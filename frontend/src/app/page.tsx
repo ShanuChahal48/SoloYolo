@@ -20,8 +20,8 @@ export default async function HomePage() {
     <main className="overflow-hidden">
       {/* --- Hero Section --- */}
       <section className="relative h-screen flex items-center justify-center text-white text-center overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-900 via-teal-600 to-amber-500 opacity-90 z-10"></div>
+        {/* Subtle Background Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40 z-10"></div>
         <video
           className="absolute inset-0 w-full h-full object-cover"
           autoPlay

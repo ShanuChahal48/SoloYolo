@@ -47,60 +47,91 @@ export default async function AboutPage() {
 
   return (
     <div className="bg-white text-gray-800">
-      {/* Hero Section */}
-  <section className="relative w-full flex items-center justify-center text-center text-white" style={{ background: 'black' }}>
+      {/* Hero Section with Proper Video Layout */}
+      <section className="relative w-full h-screen flex items-center justify-center text-center text-white overflow-hidden">
         {cover_image && cover_image.url ? (
           cover_image.mime && cover_image.mime.startsWith('video') ? (
             <video
               src={cover_image.url.startsWith('http') ? cover_image.url : `${STRAPI_URL}${cover_image.url}`}
-              className="w-full h-full object-cover z-0"
+              className="absolute inset-0 w-full h-full object-cover z-0"
               autoPlay
               loop
               muted
               playsInline
-              style={{ position: 'absolute', inset: 0 }}
             />
           ) : (
             <Image
               src={getImageUrl(cover_image, 'large') || getImageUrl(cover_image)}
               alt={cover_image.alternativeText || 'About us cover image'}
-              width={cover_image.width || cover_image.attributes?.width || 800}
-              height={cover_image.height || cover_image.attributes?.height || 600}
-              className="z-0 w-full h-auto object-contain"
+              fill
+              style={{ objectFit: 'cover' }}
+              className="z-0"
               priority
             />
           )
         ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No Media</div>
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-teal-600 to-amber-500 flex items-center justify-center text-gray-100">
+            <div className="text-center">
+              <h1 className="text-6xl font-bold mb-4">About Us</h1>
+              <p className="text-xl">Discover our story</p>
+            </div>
+          </div>
         )}
-        <div className="absolute inset-0 bg-black/50 z-10"></div>
-        <div className="relative z-20 px-4">
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight">{title}</h1>
-          <p className="mt-2 text-lg md:text-xl text-gray-200">{subtitle}</p>
+        
+        {/* Overlay with gradient for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10"></div>
+        
+        {/* Content */}
+        <div className="relative z-20 px-6 max-w-4xl mx-auto">
+          <div className="animate-fade-in-up">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6">{title}</h1>
+            <p className="text-xl md:text-2xl text-gray-100 leading-relaxed">{subtitle}</p>
+          </div>
+        </div>
+        
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+          <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
+          </div>
         </div>
       </section>
 
       {/* Main Content Section */}
-      <section className="py-20">
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-teal-50">
         <div className="container mx-auto px-6 max-w-4xl">
-          <article 
-            className="prose lg:prose-lg mx-auto"
-            dangerouslySetInnerHTML={{ __html: contentHtml }}
-          />
+          <div className="animate-fade-in-up">
+            <article 
+              className="prose lg:prose-xl mx-auto prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-teal-600 prose-strong:text-gray-900"
+              dangerouslySetInnerHTML={{ __html: contentHtml }}
+            />
+          </div>
         </div>
       </section>
 
       {/* Team Section */}
       {team_members && team_members.length > 0 && (
-        <section className="bg-gray-50 py-20">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-800">{team_section_title}</h2>
+        <section className="relative bg-white py-24 overflow-hidden">
+          {/* Background Elements */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-teal-100 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-100 to-transparent rounded-full translate-y-40 -translate-x-40"></div>
+          
+          <div className="relative z-10 container mx-auto px-6">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">{team_section_title}</h2>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Meet the passionate individuals who make our adventures possible.
+              </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {team_members.map((member: TeamMember) => (
-                <div key={member.id} className="text-center bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300">
-                  <div className="relative w-32 h-32 mx-auto mb-4">
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+              {team_members.map((member: TeamMember, index) => (
+                <div 
+                  key={member.id} 
+                  className="text-center bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift animate-fade-in-up"
+                  style={{animationDelay: `${index * 0.1}s`}}
+                >
+                  <div className="relative w-40 h-40 mx-auto mb-6">
                     {(() => {
                       const photo = member.photo?.data || member.photo;
                       const imgUrl = getImageUrl(photo, 'thumbnail');
@@ -108,17 +139,21 @@ export default async function AboutPage() {
                         <Image
                           src={imgUrl}
                           alt={member.name}
-                          layout="fill"
-                          objectFit="cover"
-                          className="rounded-full"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          className="rounded-full border-4 border-teal-100"
                         />
                       ) : (
-                        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 rounded-full">No Image</div>
+                        <div className="w-full h-full bg-gradient-to-br from-teal-100 to-amber-100 flex items-center justify-center text-teal-600 rounded-full border-4 border-teal-100">
+                          <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                          </svg>
+                        </div>
                       );
                     })()}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
-                  <p className="text-teal-600">{member.role}</p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{member.name}</h3>
+                  <p className="text-teal-600 font-medium">{member.role}</p>
                 </div>
               ))}
             </div>

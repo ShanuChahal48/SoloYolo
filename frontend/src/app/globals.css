@@ -257,6 +257,14 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* Text Utilities */
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Custom Button Styles */
 .btn-primary {
   background: var(--gradient-primary);
