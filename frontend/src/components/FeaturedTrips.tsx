@@ -31,12 +31,12 @@ export default async function FeaturedTrips() {
   }
 
   return (
-    <section className="relative bg-gradient-to-br from-white to-teal-50 py-24 overflow-hidden">
+    <section className="relative bg-gradient-to-br from-white to-emerald-50 py-24 overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-teal-200/20 rounded-full animate-float"></div>
+        <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-200/20 rounded-full animate-float"></div>
         <div className="absolute top-40 right-20 w-24 h-24 bg-amber-200/20 rounded-full animate-float" style={{animationDelay: '1.5s'}}></div>
-        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-teal-300/20 rounded-full animate-float" style={{animationDelay: '3s'}}></div>
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-orange-200/20 rounded-full animate-float" style={{animationDelay: '3s'}}></div>
       </div>
       
       <div className="relative z-10 container mx-auto px-6">

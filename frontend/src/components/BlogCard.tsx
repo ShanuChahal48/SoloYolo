@@ -62,7 +62,7 @@ export default function BlogCard({ post }: BlogCardProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
         <div className="p-6">
-          <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight group-hover:text-teal-600 transition-colors duration-300">{title}</h3>
+          <h3 className="text-xl font-bold mb-3 text-gray-900 leading-tight group-hover:text-emerald-600 transition-colors duration-300">{title}</h3>
           <p className="text-gray-600 mb-4 line-clamp-3">{excerpt}</p>
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-500">
@@ -72,7 +72,7 @@ export default function BlogCard({ post }: BlogCardProps) {
                 day: 'numeric',
               })}
             </p>
-            <div className="flex items-center text-teal-600 group-hover:text-teal-800 transition-colors duration-300">
+            <div className="flex items-center text-emerald-600 group-hover:text-emerald-800 transition-colors duration-300">
               <span className="text-sm font-medium">Read More</span>
               <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />

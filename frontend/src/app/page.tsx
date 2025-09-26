@@ -74,9 +74,64 @@ export default async function HomePage() {
       {/* --- Featured Trips Section --- */}
       <FeaturedTrips />
 
+      {/* --- Gallery Section --- */}
+      <section className="relative bg-gradient-to-br from-emerald-900 via-green-800 to-amber-800 py-24 overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-emerald-500/10 rounded-full animate-float"></div>
+          <div className="absolute top-40 right-20 w-24 h-24 bg-amber-500/10 rounded-full animate-float" style={{animationDelay: '1.5s'}}></div>
+          <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-orange-500/10 rounded-full animate-float" style={{animationDelay: '3s'}}></div>
+        </div>
+        
+        <div className="relative z-10 container mx-auto px-6">
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="text-responsive-2xl font-serif font-bold text-white mb-6">
+              Moments That Matter
+            </h2>
+            <p className="text-lg text-emerald-100 max-w-3xl mx-auto leading-relaxed">
+              Capturing the essence of adventure through stunning visuals from our journeys.
+            </p>
+          </div>
+          
+          {/* <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div 
+                key={index}
+                className="relative aspect-square rounded-xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 hover-lift group animate-fade-in-up"
+                style={{animationDelay: `${index * 0.1}s`}}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 via-green-500 to-amber-500 opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center text-white">
+                    <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mb-4 mx-auto">
+                      <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <p className="text-sm font-medium">Gallery Image {index + 1}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div> */}
+          
+          <div className="text-center mt-16 animate-fade-in-up">
+            <Link 
+              href="/gallery" 
+              className="inline-flex items-center bg-gradient-to-r from-emerald-600 to-amber-600 text-white font-semibold px-8 py-4 rounded-xl hover:from-emerald-700 hover:to-amber-700 transition-all duration-300 hover-lift hover-glow"
+            >
+              View Full Gallery
+              <svg className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* --- Testimonials Section --- */}
       {featuredTestimonials.length > 0 && (
-        <section className="relative bg-gradient-to-br from-gray-50 to-teal-50 py-24 overflow-hidden">
+        <section className="relative bg-gradient-to-br from-emerald-50 to-amber-50 py-24 overflow-hidden">
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute top-0 left-0 w-full h-full" style={{
@@ -111,9 +166,9 @@ export default async function HomePage() {
 
       {/* --- Recent Blog Posts Section --- */}
       {recentPosts.length > 0 && (
-         <section className="bg-white py-24 relative overflow-hidden">
+         <section className="bg-gradient-to-br from-white to-emerald-50 py-24 relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-teal-100 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-100 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
             <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-100 to-transparent rounded-full translate-y-40 -translate-x-40"></div>
             
             <div className="relative z-10 container mx-auto px-6">
@@ -141,7 +196,7 @@ export default async function HomePage() {
                 <div className="text-center mt-16 animate-fade-in-up">
                     <Link 
                       href="/community" 
-                      className="inline-flex items-center text-teal-600 font-semibold hover:text-teal-800 transition-all duration-300 group"
+                      className="inline-flex items-center text-emerald-600 font-semibold hover:text-emerald-800 transition-all duration-300 group"
                     >
                       Read More on Our Community Hub 
                       <svg className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
