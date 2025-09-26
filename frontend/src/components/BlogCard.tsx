@@ -17,7 +17,7 @@ interface BlogCardProps {
   post: {
     id: number;
     attributes?: BlogCardAttributesShape;
-  } & BlogCardAttributesShape;
+  };
 }
 
 const getImageUrl = (
@@ -31,9 +31,10 @@ const getImageUrl = (
 };
 
 export default function BlogCard({ post }: BlogCardProps) {
-  const a: BlogCardAttributesShape = (post.attributes as BlogCardAttributesShape) ?? (post as BlogCardAttributesShape);
-  if (!a) return null;
-  const { title, slug, excerpt, publishedAt, cover_image } = a;
+  if (!post.attributes) {
+    return null;
+  }
+  const { title, slug, excerpt, publishedAt, cover_image } = post.attributes;
   const media: StrapiMedia | undefined = (cover_image as any)?.data ?? (cover_image as any);
   const imageUrl = getImageUrl(media);
 

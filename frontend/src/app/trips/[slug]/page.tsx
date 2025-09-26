@@ -8,19 +8,34 @@ import Image from 'next/image';
 // Helper function to get a clean image URL
 const getStrapiImageUrl = (
   mediaObject:
-    | { url?: string }
+    | { url?: string; formats?: Record<string, { url?: string }> }
     | { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } }
     | { attributes?: { url?: string; formats?: Record<string, { url?: string }> } }
     | undefined,
   format: 'large' | 'medium' | 'small' | 'thumbnail' = 'large'
 ) => {
   if (!mediaObject) return '';
-  // Direct url
-  // @ts-expect-error narrow union at runtime
-  if (mediaObject.url) return `http://localhost:1337${(mediaObject as { url: string }).url}`;
-  // Nested data.attributes
-  // @ts-expect-error narrow union at runtime
-  const attrs = (mediaObject.data?.attributes || mediaObject.attributes) as { url?: string; formats?: Record<string, { url?: string }> } | undefined;
+  
+  // Direct url (for gallery items)
+  if ('url' in mediaObject && mediaObject.url) {
+    return `http://localhost:1337${mediaObject.url}`;
+  }
+  
+  // Direct formats (for gallery items)
+  if ('formats' in mediaObject && mediaObject.formats) {
+    if (mediaObject.formats[format]?.url) {
+      return `http://localhost:1337${mediaObject.formats[format].url}`;
+    }
+    // Fallback to any available format
+    for (const key of ['large', 'medium', 'small', 'thumbnail'] as const) {
+      if (mediaObject.formats[key]?.url) {
+        return `http://localhost:1337${mediaObject.formats[key].url}`;
+      }
+    }
+  }
+  
+  // Nested data.attributes (for featured_image)
+  const attrs = (mediaObject as any).data?.attributes || (mediaObject as any).attributes;
   if (attrs?.url) return `http://localhost:1337${attrs.url}`;
   if (attrs?.formats?.[format]?.url) return `http://localhost:1337${attrs.formats[format].url}`;
   const fmt = attrs?.formats;
@@ -115,18 +130,18 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
         </div>
 
         {/* Gallery Section */}
-        {gallery && gallery.data && gallery.data.length > 0 && (
+        {gallery && Array.isArray(gallery) && gallery.length > 0 && (
           <div className="mt-20">
             <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Trip Gallery</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {gallery.data.map((img: { id: number; attributes?: { alternativeText?: string; url?: string; formats?: Record<string, { url?: string }> } }) => {
+              {gallery.map((img: { id: number; alternativeText?: string; url?: string; formats?: Record<string, { url?: string }> }) => {
                 const imageUrl = getStrapiImageUrl(img, 'small');
                 return (
                   <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
-                        alt={img.attributes?.alternativeText || 'Trip gallery image'}
+                        alt={img.alternativeText || 'Trip gallery image'}
                         layout="fill"
                         objectFit="cover"
                         className="hover:scale-105 transition-transform duration-300"

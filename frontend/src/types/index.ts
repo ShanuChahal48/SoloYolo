@@ -103,3 +103,17 @@ export interface Testimonial {
     content?: string;
   };
 }
+
+// TestimonialItem interface for testimonial cards
+export interface TestimonialItem {
+  id: number;
+  attributes?: {
+    traveler_name?: string;
+    trip_taken?: string;
+    quote?: string;
+    rating?: number;
+    picture?: {
+      data: StrapiMedia;
+    };
+  };
+}

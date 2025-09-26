@@ -31,15 +31,33 @@ export default async function FeaturedTrips() {
   }
 
   return (
-    <section className="bg-white py-20">
-      <div className="container mx-auto px-6">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800">Featured Trips</h2>
-          <p className="text-gray-600 mt-2">Hand-picked journeys that you won&apos;t want to miss.</p>
+    <section className="relative bg-gradient-to-br from-white to-teal-50 py-24 overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-full">
+        <div className="absolute top-20 left-10 w-32 h-32 bg-teal-200/20 rounded-full animate-float"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-amber-200/20 rounded-full animate-float" style={{animationDelay: '1.5s'}}></div>
+        <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-teal-300/20 rounded-full animate-float" style={{animationDelay: '3s'}}></div>
+      </div>
+      
+      <div className="relative z-10 container mx-auto px-6">
+        <div className="text-center mb-16 animate-fade-in-up">
+          <h2 className="text-responsive-2xl font-serif font-bold text-gray-800 mb-6">
+            Featured Trips
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Hand-picked journeys that you won&apos;t want to miss.
+          </p>
         </div>
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {featuredTrips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
+          {featuredTrips.map((trip, index) => (
+            <div 
+              key={trip.id} 
+              className="animate-fade-in-up hover-lift"
+              style={{animationDelay: `${index * 0.2}s`}}
+            >
+              <TripCard trip={trip} />
+            </div>
           ))}
         </div>
       </div>
