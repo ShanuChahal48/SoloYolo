@@ -3,8 +3,7 @@ import ContactForm from '@/components/ContactForm';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default async function ContactPage() {
-    const data = await getContactPage();
-    const attributes = data?.attributes;
+    const attributes = await getContactPage();
 
     if (!attributes) {
         return (

@@ -94,3 +94,12 @@ export interface BlogPost {
   id: number;
   attributes: BlogPostAttributes;
 }
+
+// Minimal Testimonial type for homepage usage
+export interface Testimonial {
+  id: number;
+  attributes?: {
+    name?: string;
+    content?: string;
+  };
+}

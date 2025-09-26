@@ -1,53 +1,53 @@
 
 // Ensure getTripBySlug is exported from '@/lib/api'
 import { getTripBySlug } from '@/lib/api';
-import { Trip } from '@/types';
+import { } from '@/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import { marked } from 'marked';
 
 // Helper function to get a clean image URL
-const getStrapiImageUrl = (mediaObject: any, format = 'large') => {
+const getStrapiImageUrl = (
+  mediaObject:
+    | { url?: string }
+    | { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } }
+    | { attributes?: { url?: string; formats?: Record<string, { url?: string }> } }
+    | undefined,
+  format: 'large' | 'medium' | 'small' | 'thumbnail' = 'large'
+) => {
   if (!mediaObject) return '';
-  // Direct url property
-  if (mediaObject.url) return `http://localhost:1337${mediaObject.url}`;
-  // Nested data.attributes.url
-  if (mediaObject.data?.attributes?.url) return `http://localhost:1337${mediaObject.data.attributes.url}`;
-  // Formats (large, medium, small, thumbnail)
-  if (mediaObject.data?.attributes?.formats?.[format]?.url) return `http://localhost:1337${mediaObject.data.attributes.formats[format].url}`;
-  // Fallback to any available format
-  const formats = mediaObject.data?.attributes?.formats;
-  if (formats) {
-    for (const key of ['large', 'medium', 'small', 'thumbnail']) {
-      if (formats[key]?.url) return `http://localhost:1337${formats[key].url}`;
+  // Direct url
+  // @ts-expect-error narrow union at runtime
+  if (mediaObject.url) return `http://localhost:1337${(mediaObject as { url: string }).url}`;
+  // Nested data.attributes
+  // @ts-expect-error narrow union at runtime
+  const attrs = (mediaObject.data?.attributes || mediaObject.attributes) as { url?: string; formats?: Record<string, { url?: string }> } | undefined;
+  if (attrs?.url) return `http://localhost:1337${attrs.url}`;
+  if (attrs?.formats?.[format]?.url) return `http://localhost:1337${attrs.formats[format].url}`;
+  const fmt = attrs?.formats;
+  if (fmt) {
+    for (const key of ['large', 'medium', 'small', 'thumbnail'] as const) {
+      if (fmt[key]?.url) return `http://localhost:1337${fmt[key]?.url}`;
     }
   }
   return '';
 };
 
 export default async function TripDetailPage({ params }: { params: { slug: string } }) {
-  const trip: Trip = await getTripBySlug(params.slug);
+  const trip = await getTripBySlug(params.slug);
 
   if (!trip) {
     notFound();
   }
 
-  // Access fields directly, not via attributes
   const { title, price, duration, category, itinerary, featured_image, gallery } = trip;
-  // Debug: log featured_image structure
-  console.log('featured_image', featured_image);
 
-  // Debug: log featured_image structure
-  console.log('featured_image', featured_image);
-
-  // Safely parse the markdown content for the itinerary
   // Render itinerary blocks as paragraphs
-  let itineraryBlocks: any[] = [];
-  if (Array.isArray(itinerary)) {
-    itineraryBlocks = itinerary;
-  } else if (typeof itinerary === 'string') {
-    itineraryBlocks = [{ type: 'paragraph', children: [{ text: itinerary }] }];
-  }
+  type RichTextBlock = { type: 'paragraph'; children?: { text: string }[] };
+  const itineraryBlocks: RichTextBlock[] = Array.isArray(itinerary)
+    ? (itinerary as RichTextBlock[])
+    : typeof itinerary === 'string'
+    ? [{ type: 'paragraph', children: [{ text: itinerary }] }]
+    : [];
 
   return (
     <div className="bg-white">
@@ -79,7 +79,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
             <article className="prose lg:prose-xl max-w-none">
               {itineraryBlocks.map((block, idx) => {
                 if (block.type === 'paragraph' && block.children) {
-                  const text = block.children.map((child: any) => child.text).join(' ');
+                  const text = block.children.map((child) => child.text).join(' ');
                   if (text.trim()) {
                     return (
                       <p key={idx} className="mb-4 text-lg text-gray-700 leading-relaxed bg-gray-50 rounded-lg p-4 shadow">
@@ -119,17 +119,26 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
           <div className="mt-20">
             <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">Trip Gallery</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {gallery.data.map((img: any) => (
-                <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
-                  <Image
-                    src={getStrapiImageUrl(img, 'small')}
-                    alt={img.attributes?.alternativeText || 'Trip gallery image'}
-                    layout="fill"
-                    objectFit="cover"
-                    className="hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ))}
+              {gallery.data.map((img: { id: number; attributes?: { alternativeText?: string; url?: string; formats?: Record<string, { url?: string }> } }) => {
+                const imageUrl = getStrapiImageUrl(img, 'small');
+                return (
+                  <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
+                    {imageUrl ? (
+                      <Image
+                        src={imageUrl}
+                        alt={img.attributes?.alternativeText || 'Trip gallery image'}
+                        layout="fill"
+                        objectFit="cover"
+                        className="hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

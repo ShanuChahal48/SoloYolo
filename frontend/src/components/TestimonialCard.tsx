@@ -17,39 +17,60 @@ const StarIcon = ({ filled }: { filled: boolean }) => (
 
 interface TestimonialCardProps {
   testimonial: {
-    attributes: {
-      traveler_name: string;
-      trip_taken: string;
-      quote: string;
-      rating: number;
-      picture: {
-        data: StrapiMedia;
+    attributes?: {
+      traveler_name?: string;
+      trip_taken?: string;
+      quote?: string;
+      rating?: number;
+      picture?: {
+        data?: StrapiMedia;
       };
+    };
+    traveler_name?: string;
+    trip_taken?: string;
+    quote?: string;
+    rating?: number;
+    picture?: {
+      data?: StrapiMedia;
     };
   };
 }
 
 export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
-  const { traveler_name, trip_taken, quote, rating, picture } = testimonial.attributes;
-  const imageUrl = `${STRAPI_URL}${picture.data.attributes.formats.thumbnail.url}`;
+  const src = (testimonial.attributes || testimonial) as {
+    traveler_name?: string;
+    trip_taken?: string;
+    quote?: string;
+    rating?: number;
+    picture?: { data?: StrapiMedia };
+  };
+  const { traveler_name, trip_taken, quote, rating, picture } = src;
+  const safeRating = typeof rating === 'number' ? rating : 0;
+  const media = (picture as any)?.data?.attributes || (picture as any)?.attributes || (picture as any) || {};
+  const rawUrl = media?.formats?.thumbnail?.url || media?.url || '';
+  const imageUrl = rawUrl ? `${STRAPI_URL}${rawUrl}` : '';
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg flex flex-col h-full">
       <div className="flex items-center mb-4">
         {Array.from({ length: 5 }, (_, i) => (
-          <StarIcon key={i} filled={i < rating} />
+          <StarIcon key={i} filled={i < safeRating} />
         ))}
       </div>
-      <p className="text-gray-600 italic flex-grow">"{quote}"</p>
+      <p className="text-gray-600 italic flex-grow">&quot;{quote}&quot;</p>
       <div className="mt-6 flex items-center">
         <div className="relative w-14 h-14 mr-4">
-          <Image
-            src={imageUrl}
-            alt={traveler_name}
-            layout="fill"
-            objectFit="cover"
-            className="rounded-full"
-          />
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt={traveler_name || ''}
+              layout="fill"
+              objectFit="cover"
+              className="rounded-full"
+            />
+          ) : (
+            <div className="w-full h-full rounded-full bg-gray-200" />
+          )}
         </div>
         <div>
           <p className="font-bold text-gray-900">{traveler_name}</p>

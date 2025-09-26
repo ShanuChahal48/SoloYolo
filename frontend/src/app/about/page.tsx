@@ -2,7 +2,6 @@ import { getAboutPage } from '@/lib/api';
 import { StrapiMedia } from '@/types'; // Assuming you have a types file
 import Image from 'next/image';
 import { marked } from 'marked';
-import { notFound } from 'next/navigation';
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 
@@ -19,20 +18,20 @@ interface TeamMember {
 const getImageUrl = (media: StrapiMedia, format: 'thumbnail' | 'small' | 'medium' | 'large' = 'medium') => {
   if (!media) return '';
   // If media is a direct object (not .attributes), use its fields
-  const formats = media.formats || media.attributes?.formats || {};
-  let url = formats[format]?.url || media.url || media.attributes?.url;
+  const formats = media.formats || media.attributes?.formats || {} as Record<string, { url?: string }>;
+  let url = (formats[format]?.url) || media.url || media.attributes?.url;
   if (!url) {
-    const availableFormat = Object.values(formats)[0] as any;
-    url = availableFormat?.url || media.url || media.attributes?.url;
+    const firstFormat = Object.values(formats)[0];
+    url = (firstFormat && firstFormat.url) || media.url || media.attributes?.url;
   }
   if (!url) return '';
   return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
 export default async function AboutPage() {
-  const aboutData = await getAboutPage();
+  const aboutAttributes = await getAboutPage();
 
-  if (!aboutData || !aboutData.data) {
+  if (!aboutAttributes) {
     return (
       <div className="bg-white text-gray-800 min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -43,7 +42,7 @@ export default async function AboutPage() {
     );
   }
 
-  const { title, subtitle, main_content, cover_image, team_section_title, team_members } = aboutData.data;
+  const { title, subtitle, main_content, cover_image, team_section_title, team_members } = aboutAttributes;
   const contentHtml = marked.parse(main_content);
 
   return (

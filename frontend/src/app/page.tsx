@@ -1,20 +1,19 @@
 import Link from 'next/link';
-import { getFeaturedTrips, getTestimonials, getBlogPosts } from '@/lib/api';
+import { getTestimonials, getBlogPosts } from '@/lib/api';
 import FeaturedTrips from '@/components/FeaturedTrips';
 import TestimonialCard from '@/components/TestimonialCard';
 import BlogCard from '@/components/BlogCard';
-import { Trip, Testimonial, BlogPost } from '@/types';
+import { BlogPost, StrapiMedia } from '@/types';
 
 export default async function HomePage() {
   // Fetch all necessary data in parallel for maximum efficiency
-  const [featuredTrips, testimonials, blogPosts] = await Promise.all([
-    getFeaturedTrips(),
+  const [testimonials, blogPosts] = await Promise.all([
     getTestimonials(),
     getBlogPosts(),
   ]);
 
   // We only want to show a few items on the homepage to keep it clean
-  const featuredTestimonials: Testimonial[] = testimonials.slice(0, 3);
+  const featuredTestimonials = testimonials.slice(0, 3);
   const recentPosts: BlogPost[] = blogPosts.slice(0, 3);
 
   return (
@@ -29,7 +28,7 @@ export default async function HomePage() {
           muted
           playsInline
           // Ensure your video file is named 'travel-video.mp4' and placed in the /public folder
-          src="/travel-video.mp4" 
+          src="/travelVideo.mp4" 
         >
           Your browser does not support the video tag.
         </video>
@@ -50,7 +49,7 @@ export default async function HomePage() {
       </section>
 
       {/* --- Featured Trips Section --- */}
-      <FeaturedTrips trips={featuredTrips as Trip[]} />
+      <FeaturedTrips />
 
       {/* --- Testimonials Section --- */}
       {featuredTestimonials.length > 0 && (
@@ -61,8 +60,8 @@ export default async function HomePage() {
               Real stories from adventurers who have journeyed with us.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {featuredTestimonials.map((testimonial) => (
-                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              {featuredTestimonials.map((t: unknown) => (
+                <TestimonialCard key={(t as { id: number }).id} testimonial={t as unknown as { attributes: { traveler_name: string; trip_taken: string; quote: string; rating: number; picture: { data: StrapiMedia } } }} />
               ))}
             </div>
           </div>

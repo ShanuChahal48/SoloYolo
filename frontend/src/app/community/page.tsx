@@ -1,10 +1,22 @@
 import { getBlogPosts, getTestimonials } from '@/lib/api';
+import type { BlogPost, StrapiMedia } from '@/types';
 import BlogCard from '@/components/BlogCard';
 import TestimonialCard from '@/components/TestimonialCard';
 
+interface TestimonialItem {
+  id: number;
+  attributes?: {
+    traveler_name?: string;
+    trip_taken?: string;
+    quote?: string;
+    rating?: number;
+    picture?: { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } };
+  };
+}
+
 export default async function BlogPage() {
   // Fetch both blog posts and testimonials at the same time for better performance.
-  const [posts, testimonials] = await Promise.all([
+  const [posts, testimonials]: [BlogPost[], TestimonialItem[]] = await Promise.all([
     getBlogPosts(),
     getTestimonials()
   ]);
@@ -25,7 +37,7 @@ export default async function BlogPage() {
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">From Our Blog</h2>
           {posts.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post) => (
+              {posts.map((post: BlogPost) => (
                 <BlogCard key={post.id} post={post} />
               ))}
             </div>
@@ -42,8 +54,8 @@ export default async function BlogPage() {
           <div className="container mx-auto px-6">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-12">What Our Travelers Say</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial: any) => (
-                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              {testimonials.map((testimonial: TestimonialItem) => (
+                <TestimonialCard key={testimonial.id} testimonial={testimonial as unknown as { attributes: { traveler_name: string; trip_taken: string; quote: string; rating: number; picture: { data: StrapiMedia } } }} />
               ))}
             </div>
           </div>

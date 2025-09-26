@@ -6,14 +6,14 @@ const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
 /**
  * A utility function to make API requests to Strapi.
  */
-export async function fetchApi(endpoint: string, query?: Record<string, any>, options?: RequestInit) {
+export async function fetchApi(endpoint: string, query?: Record<string, unknown>, options?: RequestInit) {
     const defaultOptions = {
         headers: {
             'Content-Type': 'application/json',
         },
         next: { revalidate: 60 } // Revalidate every 60 seconds
-    };
-    const mergedOptions = { ...defaultOptions, ...options };
+    } as const;
+    const mergedOptions: RequestInit = { ...defaultOptions, ...options };
     
     const queryString = qs.stringify(query, { encodeValuesOnly: true });
     const requestUrl = `${STRAPI_URL}/api${endpoint}${queryString ? `?${queryString}` : ''}`;
@@ -39,7 +39,7 @@ export async function getTrips() {
     const query = {
         populate: ['featured_image'],
         sort: ['publishedAt:desc'],
-    };
+    } as const;
     const res = await fetchApi('/trips', query);
     if (!res?.data) {
         return [];
@@ -54,8 +54,11 @@ export async function getTrips() {
 export async function getTripBySlug(slug: string) {
     const query = {
         filters: { slug: { $eq: slug } },
-        populate: ['featured_image', 'gallery'], 
-    };
+        populate: {
+            featured_image: true,
+            gallery: true
+        }, 
+    } as const;
     const res = await fetchApi('/trips', query);
 
     if (!res?.data || res.data.length === 0) {
@@ -73,11 +76,12 @@ export async function getTripBySlug(slug: string) {
 export async function getAboutPage() {
     const query = {
         populate: {
+            cover_image: true,
             team_members: {
                 populate: ['photo'],
             },
         },
-    };
+    } as const;
     const res = await fetchApi('/about-page', query);
     return res?.data || null;
 }
@@ -89,7 +93,7 @@ export async function getAboutPage() {
 export async function getContactPage() {
     const query = {
         populate: '*',
-    };
+    } as const;
     const res = await fetchApi('/contact-page', query);
     return res?.data || null;
 }
@@ -103,9 +107,12 @@ export async function getContactPage() {
  */
 export async function getBlogPosts() {
     const query = {
-        populate: ['cover_image', 'author'],
+        populate: {
+            cover_image: true,
+            author: { populate: ['picture'] },
+        },
         sort: ['publishedAt:desc'],
-    };
+    } as const;
     const res = await fetchApi('/blog-posts', query);
     return res?.data || [];
 }
@@ -118,8 +125,11 @@ export async function getBlogPosts() {
 export async function getPostBySlug(slug: string) {
     const query = {
         filters: { slug: { $eq: slug } },
-        populate: ['cover_image', 'author'],
-    };
+        populate: {
+            cover_image: true,
+            author: { populate: ['picture'] },
+        },
+    } as const;
     const res = await fetchApi('/blog-posts', query);
     return res?.data?.[0] || null;
 }
@@ -130,8 +140,9 @@ export async function getPostBySlug(slug: string) {
  */
 export async function getTestimonials() {
     const query = {
-        sort: ['name:asc'],
-    };
+        sort: ['traveler_name:asc'],
+        populate: ['picture'],
+    } as const;
     const res = await fetchApi('/testimonials', query);
     return res?.data || [];
 }
@@ -140,7 +151,7 @@ export async function getFeaturedTrips() {
     const query = {
         filters: { is_featured: { $eq: true } },
         populate: ['cover_image']
-    };
+    } as const;
     const res = await fetchApi('/trips', query);
     return res?.data || [];
 }
