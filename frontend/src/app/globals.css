@@ -1,27 +1,32 @@
-@import "tailwindcss";
-/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap'); */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* ---
+/* 1. DESIGN TOKENS (VARIABLES)
+/* Your original, excellent design system is preserved here.
+/* --- */
 :root {
+  /* Core Palette */
   --background: #ffffff;
   --foreground: #1a1a1a;
-  --primary: #059669;
-  --primary-dark: #047857;
-  --secondary: #d97706;
-  --accent: #7c2d12;
-  --gradient-primary: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  --gradient-secondary: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-  --gradient-hero: linear-gradient(135deg, #064e3b 0%, #059669 50%, #d97706 100%);
-  --gradient-accent: linear-gradient(135deg, #7c2d12 0%, #991b1b 100%);
+  
+  /* Brand Colors (Using descriptive names for clarity) */
+  --brand-primary: #059669;      /* Emerald Green */
+  --brand-primary-dark: #047857;
+  --brand-secondary: #d97706;    /* Amber/Gold */
+  --brand-accent: #7c2d12;       /* Russet/Brown */
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--brand-primary) 0%, #10b981 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--brand-secondary) 0%, #f59e0b 100%);
+  --gradient-hero: linear-gradient(135deg, #064e3b 0%, var(--brand-primary) 50%, var(--brand-secondary) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--brand-accent) 0%, #991b1b 100%);
+  
+  /* Shadows */
   --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   --shadow-medium: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   --shadow-large: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Playfair Display', Georgia, serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -31,10 +36,9 @@
   }
 }
 
-* {
-  box-sizing: border-box;
-}
-
+/* ---
+/* 2. BASE & TYPOGRAPHY
+/* --- */
 html {
   scroll-behavior: smooth;
 }
@@ -47,262 +51,129 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Animations */
+/* ---
+/* 3. ANIMATIONS & KEYFRAMES
+/* Combining your keyframes with new ones for more variety.
+/* --- */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes scaleIn {
-  from {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ---
+/* 4. UTILITY CLASSES (@layer)
+/* Integrating custom utilities cleanly with Tailwind CSS.
+/* --- */
+@layer utilities {
+  /* Animation Classes */
+  .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+  .animate-fade-in-up { animation: fadeInUp 0.6s ease-out forwards; }
+  .animate-fade-in-down { animation: fadeInDown 0.6s ease-out forwards; }
+  .animate-fade-in-left { animation: fadeInLeft 0.6s ease-out forwards; }
+  .animate-fade-in-right { animation: fadeInRight 0.6s ease-out forwards; }
+  .animate-scale-in { animation: scaleIn 0.5s ease-out forwards; }
+
+  /* Staggered Animation Delays (NEW) */
+  .animation-delay-200 { animation-delay: 200ms; }
+  .animation-delay-400 { animation-delay: 400ms; }
+  .animation-delay-600 { animation-delay: 600ms; }
+
+  /* Card Shine Effect on Hover (NEW) */
+  .shine-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  .shine-effect::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(45deg);
     opacity: 0;
-    transform: scale(0.9);
+    transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
-  to {
+  .shine-effect:hover::after {
     opacity: 1;
-    transform: scale(1);
+  }
+
+  /* Your excellent hover utilities */
+  .hover-lift {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hover-lift:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-large);
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Custom Buttons */
+  .btn-primary {
+    @apply text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 ease-in-out relative overflow-hidden;
+    background: var(--gradient-primary);
+  }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
   }
 }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200px 0;
-  }
-  100% {
-    background-position: calc(200px + 100%) 0;
-  }
-}
-
-/* Animation Classes */
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-.animate-fade-in-left {
-  animation: fadeInLeft 0.6s ease-out;
-}
-
-.animate-fade-in-right {
-  animation: fadeInRight 0.6s ease-out;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.5s ease-out;
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-pulse-slow {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  background-size: 200px 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Hover Effects */
-.hover-lift {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-large);
-}
-
-.hover-glow {
-  transition: all 0.3s ease;
-}
-
-.hover-glow:hover {
-  box-shadow: 0 0 20px rgba(13, 148, 136, 0.3);
-}
-
-.hover-scale {
-  transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-
-/* Gradient Text */
-.gradient-text {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.gradient-text-secondary {
-  background: var(--gradient-secondary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Custom Scrollbar */
+/* ---
+/* 5. CUSTOM SCROLLBAR
+/* --- */
 ::-webkit-scrollbar {
   width: 8px;
 }
-
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--background);
 }
-
 ::-webkit-scrollbar-thumb {
-  background: var(--gradient-primary);
+  background: var(--brand-primary);
   border-radius: 4px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-dark);
+  background: var(--brand-primary-dark);
 }
 
-/* Loading States */
-.skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-/* Responsive Typography */
-@media (max-width: 640px) {
-  .text-responsive-xl {
-    font-size: 2rem;
-    line-height: 1.2;
-  }
-  
-  .text-responsive-2xl {
-    font-size: 2.5rem;
-    line-height: 1.1;
-  }
-  
-  .text-responsive-3xl {
-    font-size: 3rem;
-    line-height: 1;
-  }
-}
-
-@media (min-width: 641px) {
-  .text-responsive-xl {
-    font-size: 2.5rem;
-    line-height: 1.2;
-  }
-  
-  .text-responsive-2xl {
-    font-size: 3rem;
-    line-height: 1.1;
-  }
-  
-  .text-responsive-3xl {
-    font-size: 4rem;
-    line-height: 1;
-  }
-}
-
-/* Glass Morphism */
-.glass {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Text Utilities */
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Custom Button Styles */
-.btn-primary {
-  background: var(--gradient-primary);
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-secondary {
-  background: transparent;
-  color: var(--primary);
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: 2px solid var(--primary);
-  cursor: pointer;
-}
-
-.btn-secondary:hover {
-  background: var(--primary);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-medium);
-}
