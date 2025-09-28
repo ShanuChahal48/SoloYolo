@@ -1,7 +1,7 @@
 
 import qs from 'qs';
 
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
 /**
  * A utility function to make API requests to Strapi.
@@ -155,3 +155,14 @@ export async function getFeaturedTrips() {
     const res = await fetchApi('/trips', query);
     return res?.data || [];
 }
+ export function getStrapiMediaUrl(url: string | undefined, format?: 'thumbnail' | 'small' | 'medium' | 'large') {
+        if (!url) {
+            return '';
+        }
+        // If the URL is already absolute (contains http), return it directly.
+        if (url.startsWith('http')) {
+            return url;
+        }
+        // Otherwise, prepend the Strapi URL.
+        return `${STRAPI_URL}${url}`;
+    }
