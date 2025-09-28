@@ -2,7 +2,6 @@ export default [
   'strapi::logger',
   'strapi::errors',
   'strapi::security',
-  'strapi::cors',
   'strapi::poweredBy',
   'strapi::query',
   'strapi::body',
@@ -18,6 +17,14 @@ export default [
       // You may need to uncomment and set secure: true if you still have issues, 
       // but proxy: true usually handles it.
       secure: true, 
+    },
+  },
+  {
+    name: 'strapi::cors',
+    config: {
+      origin: ['https://soloyolo-frontend.onrender.com'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      credentials: true,
     },
   },
   'strapi::favicon',
