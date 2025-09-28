@@ -46,7 +46,12 @@ export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
   };
   const { traveler_name, trip_taken, quote, rating, picture } = src;
   const safeRating = typeof rating === 'number' ? rating : 0;
-  const media = (picture as any)?.data?.attributes || (picture as any)?.attributes || (picture as any) || {};
+  let media: StrapiMedia | undefined = undefined;
+  if (picture && 'data' in picture && picture.data && picture.data.id) {
+    media = picture.data;
+  } else if (picture && 'id' in picture && typeof picture.id === 'number') {
+    media = picture as StrapiMedia;
+  }
   const rawUrl = media?.formats?.thumbnail?.url || media?.url || '';
   const imageUrl = rawUrl ? `${STRAPI_URL}${rawUrl}` : '';
 

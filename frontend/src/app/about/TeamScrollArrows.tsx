@@ -5,9 +5,10 @@ export default function TeamScrollArrows() {
   const [canScrollRight, setCanScrollRight] = useState(false);
 
   useEffect(() => {
-    function handleScrollEvent(e: any) {
-      setCanScrollLeft(e.detail.canScrollLeft);
-      setCanScrollRight(e.detail.canScrollRight);
+    function handleScrollEvent(e: Event) {
+      const customEvent = e as CustomEvent<{canScrollLeft: boolean, canScrollRight: boolean}>;
+      setCanScrollLeft(customEvent.detail.canScrollLeft);
+      setCanScrollRight(customEvent.detail.canScrollRight);
     }
     function checkScrollability() {
       const el = document.getElementById("team-scroll");

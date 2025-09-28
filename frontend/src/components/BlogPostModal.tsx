@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+// import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { BlogPost } from '@/types';
@@ -28,25 +28,44 @@ export default function BlogPostModal(props: BlogPostModalProps) {
     media: StrapiMedia | undefined,
     format: 'thumbnail' | 'small' | 'medium' | 'large' = 'large'
   ) => {
-    const directUrl = (media as any)?.formats?.[format]?.url || (media as any)?.url;
-    const attrsUrl = media?.attributes?.formats?.[format]?.url || media?.attributes?.url;
-    const url = directUrl || attrsUrl || '';
-    return `${STRAPI_URL}${url}`;
+    let url = '';
+    if (media) {
+      if (media.formats && media.formats[format]?.url) {
+        url = media.formats[format]?.url ?? '';
+      } else if (media.url) {
+        url = media.url;
+      } else if (media.attributes) {
+        if (media.attributes.formats && media.attributes.formats[format]?.url) {
+          url = media.attributes.formats[format]?.url ?? '';
+        } else if (media.attributes.url) {
+          url = media.attributes.url;
+        }
+      }
+    }
+    return url ? `${STRAPI_URL}${url}` : '';
   };
 
   const { title, content, publishedAt, cover_image, author } = post.attributes || {};
-  const media: StrapiMedia | undefined = (cover_image as any)?.data ?? (cover_image as any);
+  let media: StrapiMedia | undefined = undefined;
+  if (cover_image && typeof cover_image === 'object') {
+    if ('data' in cover_image && cover_image.data && typeof cover_image.data.id === 'number') {
+      media = cover_image.data;
+    } else if ('id' in cover_image && typeof cover_image.id === 'number') {
+      media = cover_image as StrapiMedia;
+    }
+  }
   const imageUrl = getImageUrl(media);
   const contentHtml = content ? marked.parse(content) : '';
   const authorData = author?.data?.attributes;
-  let authorPic: any = undefined;
+  let authorPic: StrapiMedia | undefined = undefined;
   if (authorData?.picture) {
-    if (authorData.picture.data) {
-      authorPic = authorData.picture.data.attributes || authorData.picture.data;
-    } else if (typeof authorData.picture === 'object' && 'attributes' in authorData.picture) {
-      authorPic = (authorData.picture as any).attributes;
-    } else {
-      authorPic = authorData.picture;
+    // If picture is { data: StrapiMedia }
+    if ('data' in authorData.picture && authorData.picture.data && authorData.picture.data.id) {
+      authorPic = authorData.picture.data;
+    }
+    // If picture is StrapiMedia
+    else if ('id' in authorData.picture && typeof authorData.picture.id === 'number') {
+      authorPic = authorData.picture as StrapiMedia;
     }
   }
   const authorImageUrl = authorPic?.formats?.thumbnail?.url

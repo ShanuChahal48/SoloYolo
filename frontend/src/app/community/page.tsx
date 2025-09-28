@@ -48,11 +48,11 @@ export default function BlogPage() {
   }, []);
 
    // --- NEW: Functions to control the modal ---
-  const openModal = (index: number) => {
-  console.log('BlogCard clicked, opening modal for index:', index);
-  setActivePostIndex(index);
-  document.body.style.overflow = 'hidden'; // Prevent background scroll
-  };
+  // const openModal = (index: number) => {
+  //   console.log('BlogCard clicked, opening modal for index:', index);
+  //   setActivePostIndex(index);
+  //   document.body.style.overflow = 'hidden'; // Prevent background scroll
+  // };
 
   const closeModal = () => {
     setActivePostIndex(null);

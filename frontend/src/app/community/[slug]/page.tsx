@@ -26,23 +26,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  const postData = (post as { attributes?: any }).attributes ?? post;
-  const { title, content, publishedAt, cover_image, author } = postData as {
-    title: string;
-    content: string;
-    publishedAt: string;
-    cover_image: any;
-    author: any;
-  };
-  const media = (cover_image?.data ?? cover_image) as any;
+  const postData = (post as { attributes?: import('@/types').BlogPostAttributes }).attributes ?? post;
+  const { title, content, publishedAt, cover_image, author } = postData as import('@/types').BlogPostAttributes;
+  const media = (cover_image?.data ?? cover_image) as import('@/types').StrapiMedia;
   const contentHtml = marked.parse(content);
-  const authorData = (author?.data?.attributes ?? author) as any;
-  const authorPic = authorData?.picture?.data?.attributes || authorData?.picture?.attributes || authorData?.picture;
-  const authorImageUrl = authorPic?.formats?.thumbnail?.url
-    ? `${STRAPI_URL}${authorPic.formats.thumbnail.url}`
-    : authorPic?.url
-    ? `${STRAPI_URL}${authorPic.url}`
-    : '';
+    const authorAttributes = author?.data?.attributes ?? undefined;
+    const authorPic = authorAttributes?.picture?.data?.attributes ?? undefined;
+    const authorImageUrl = authorPic?.formats?.thumbnail?.url
+      ? `${STRAPI_URL}${authorPic.formats.thumbnail.url}`
+      : authorPic?.url
+      ? `${STRAPI_URL}${authorPic.url}`
+      : '';
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -62,7 +56,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 loop
                 muted
                 className="absolute inset-0 w-full h-full object-cover"
-                poster={media?.preview || media?.attributes?.preview || undefined}
+                  poster={undefined}
               >
                 Your browser does not support the video tag.
               </video>
@@ -90,7 +84,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 {authorImageUrl ? (
                   <Image
                     src={authorImageUrl}
-                    alt={authorData?.name || 'Author'}
+                      alt={authorAttributes?.name || 'Author'}
                     fill
                     sizes="48px"
                     style={{ objectFit: 'cover' }}
@@ -101,7 +95,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 )}
               </div>
               <div className="text-left">
-                <p className="font-semibold text-white">{authorData?.name || ''}</p>
+                  <p className="font-semibold text-white">{authorAttributes?.name || ''}</p>
                 <p className="text-sm text-teal-200">
                   {new Date(publishedAt).toLocaleDateString('en-US', {
                     year: 'numeric',

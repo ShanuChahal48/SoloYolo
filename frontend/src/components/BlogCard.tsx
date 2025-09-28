@@ -1,6 +1,6 @@
 
 import Image from 'next/image';
-import Link from 'next/link';
+// import Link from 'next/link';
 import { StrapiMedia } from '@/types'; // Assuming types file exists
 
 const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
@@ -30,10 +30,21 @@ const getImageUrl = (
   media: StrapiMedia | undefined,
   format: 'thumbnail' | 'small' | 'medium' | 'large' = 'small'
 ) => {
-  const directUrl = (media as any)?.formats?.[format]?.url || (media as any)?.url;
-  const attrsUrl = media?.attributes?.formats?.[format]?.url || media?.attributes?.url;
-  const url = directUrl || attrsUrl || '';
-  return `${STRAPI_URL}${url}`;
+  let url = '';
+  if (media) {
+    if (media.formats && media.formats[format]?.url) {
+      url = media.formats[format]?.url ?? '';
+    } else if (media.url) {
+      url = media.url;
+    } else if (media.attributes) {
+      if (media.attributes.formats && media.attributes.formats[format]?.url) {
+        url = media.attributes.formats[format]?.url ?? '';
+      } else if (media.attributes.url) {
+        url = media.attributes.url;
+      }
+    }
+  }
+  return url ? `${STRAPI_URL}${url}` : '';
 };
 
 export default function BlogCard({ post }: BlogCardProps) {
@@ -42,8 +53,8 @@ export default function BlogCard({ post }: BlogCardProps) {
   if (!postData.title || !postData.slug) {
     return null;
   }
-  const { title, slug, excerpt, publishedAt, cover_image } = postData;
-  const media: StrapiMedia | undefined = (cover_image as any)?.data ?? (cover_image as any);
+  const { title, excerpt, publishedAt, cover_image } = postData;
+  const media: StrapiMedia | undefined = (cover_image as { data?: StrapiMedia })?.data ?? (cover_image as StrapiMedia);
   const imageUrl = getImageUrl(media);
   // Check if media is a video (mp4)
   const isVideo = imageUrl.endsWith('.mp4');
@@ -58,14 +69,14 @@ export default function BlogCard({ post }: BlogCardProps) {
               src={imageUrl}
               controls
               className="absolute inset-0 w-full h-full object-cover rounded-t-xl shadow-md"
-              poster={(media as any)?.preview || undefined}
+              poster={undefined}
             >
               Your browser does not support the video tag.
             </video>
           ) : (
             <Image
               src={imageUrl}
-              alt={(media as any)?.alternativeText || media?.attributes?.alternativeText || `Cover image for ${title}`}
+              alt={media?.alternativeText || media?.attributes?.alternativeText || `Cover image for ${title}`}
               fill
               sizes="350px"
               style={{ objectFit: 'cover' }}

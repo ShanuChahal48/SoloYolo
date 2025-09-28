@@ -1,6 +1,7 @@
 import { fetchApi } from '@/lib/api';
 import { Trip } from '../../types/index';
 import TripCard from '../../components/TripCard';
+import Image from 'next/image';
 
 async function getTrips() {
   const query = {
@@ -24,11 +25,13 @@ export default async function TripsPage() {
       {/* Header Image with Overlayed Title and Description */}
       <div className="relative w-full bg-black">
         <div className="w-full h-[220px] sm:h-[320px] md:h-[400px] lg:h-[480px] xl:h-[560px] 2xl:h-[640px] relative flex items-center justify-center">
-          <img
+          <Image
             src="/desktop.adapt.1920.high.webp"
             alt="Trips Header"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ zIndex: 1 }}
+            fill
+            style={{ objectFit: 'cover', zIndex: 1 }}
+            className="absolute inset-0 w-full h-full"
+            sizes="100vw"
           />
           {/* Overlay with title and description inside the image */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2 sm:px-4 pt-20 sm:pt-24 md:pt-28 lg:pt-32" style={{ zIndex: 2 }}>
@@ -94,7 +97,7 @@ export default async function TripsPage() {
               </div>
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">Adventures Coming Soon</h2>
               <p className="text-gray-600 leading-relaxed">
-                We're crafting amazing new experiences for you. Check back soon for incredible journeys that await!
+                We&apos;re crafting amazing new experiences for you. Check back soon for incredible journeys that await!
               </p>
             </div>
           </div>

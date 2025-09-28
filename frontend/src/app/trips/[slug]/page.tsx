@@ -35,7 +35,7 @@ const getStrapiImageUrl = (
   }
   
   // Nested data.attributes (for featured_image)
-  const attrs = (mediaObject as any).data?.attributes || (mediaObject as any).attributes;
+  const attrs = (mediaObject as import('@/types').StrapiMedia).attributes;
   if (attrs?.url) return `http://localhost:1337${attrs.url}`;
   if (attrs?.formats?.[format]?.url) return `http://localhost:1337${attrs.formats[format].url}`;
   const fmt = attrs?.formats;
@@ -60,7 +60,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
   // Render itinerary blocks as paragraphs
   type RichTextBlock = { type: 'paragraph'; children?: { text: string }[] };
   const itineraryBlocks: RichTextBlock[] = Array.isArray(itinerary)
-    ? (itinerary as RichTextBlock[])
+    ? itinerary as RichTextBlock[]
     : typeof itinerary === 'string'
     ? [{ type: 'paragraph', children: [{ text: itinerary }] }]
     : [];

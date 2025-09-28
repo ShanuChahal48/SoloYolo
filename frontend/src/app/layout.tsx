@@ -10,11 +10,11 @@ const inter = Inter({
   display: 'swap',
 });
 
-const playfairDisplay = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-serif', // Matches your CSS variable
-  display: 'swap',
-});
+// const playfairDisplay = Playfair_Display({
+//   subsets: ['latin'],
+//   variable: '--font-serif', // Matches your CSS variable
+//   display: 'swap',
+// });
 
 export const metadata: Metadata = {
   title: "Soumil Travels - Offbeat Journeys for the Modern Explorer",
