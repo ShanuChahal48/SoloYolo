@@ -17,7 +17,7 @@ export default [
       autoCommit: true,
       // You may need to uncomment and set secure: true if you still have issues, 
       // but proxy: true usually handles it.
-      // secure: true, 
+      secure: true, 
     },
   },
   'strapi::favicon',
