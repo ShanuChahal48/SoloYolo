@@ -1,25 +1,106 @@
+"use client";
+
+import {useState, useEffect, useRef} from 'react';
+import Link from 'next/link';
 import { getBlogPosts, getTestimonials } from '@/lib/api';
-import type { BlogPost, StrapiMedia } from '@/types';
+import type { BlogPost, StrapiMedia, Testimonial } from '@/types';
 import BlogCard from '@/components/BlogCard';
 import TestimonialCard from '@/components/TestimonialCard';
+import {ChevronLeft,ChevronRight} from 'lucide-react'
+import BlogPostModal from '@/components/BlogPostModal'; // We will create this new component
 
-interface TestimonialItem {
-  id: number;
-  attributes?: {
-    traveler_name?: string;
-    trip_taken?: string;
-    quote?: string;
-    rating?: number;
-    picture?: { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } };
-  };
-}
 
-export default async function BlogPage() {
+// interface TestimonialItem {
+//   id: number;
+//   attributes?: {
+//     traveler_name?: string;
+//     trip_taken?: string;
+//     quote?: string;
+//     rating?: number;
+//     picture?: { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } };
+//   };
+// }
+
+export default function BlogPage() {
   // Fetch both blog posts and testimonials at the same time for better performance.
-  const [posts, testimonials]: [BlogPost[], TestimonialItem[]] = await Promise.all([
-    getBlogPosts(),
-    getTestimonials()
-  ]);
+ const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // State to manage if arrows should be enabled or disabled
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+
+  // --- NEW: State to manage the modal ---
+  const [activePostIndex, setActivePostIndex] = useState<number | null>(null);
+
+  // Since this is now a client component, we fetch data using useEffect
+  useEffect(() => {
+    async function fetchData() {
+      const [blogData, testimonialData] = await Promise.all([
+        getBlogPosts(),
+        getTestimonials()
+      ]);
+      setPosts(blogData);
+      setTestimonials(testimonialData);
+    }
+    fetchData();
+  }, []);
+
+   // --- NEW: Functions to control the modal ---
+  const openModal = (index: number) => {
+  console.log('BlogCard clicked, opening modal for index:', index);
+  setActivePostIndex(index);
+  document.body.style.overflow = 'hidden'; // Prevent background scroll
+  };
+
+  const closeModal = () => {
+    setActivePostIndex(null);
+    document.body.style.overflow = ''; // Re-enable background scroll
+  };
+
+  const navigateModal = (newIndex: number) => {
+    if (newIndex >= 0 && newIndex < posts.length) {
+      setActivePostIndex(newIndex);
+    }
+  };
+
+  // This function checks if there's more content to scroll to
+  const checkScrollability = () => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      // Disable left arrow if first blog is fully in view
+      setCanScrollLeft(el.scrollLeft > 5);
+      // Disable right arrow if last blog is fully in view
+      setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 5);
+    }
+  };
+
+  // Set up event listener to check scrollability whenever the user scrolls or posts load
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      checkScrollability(); // Initial check
+      el.addEventListener('scroll', checkScrollability);
+    }
+    // Cleanup the event listener when the component is removed
+    return () => {
+      if (el) {
+        el.removeEventListener('scroll', checkScrollability);
+      }
+    };
+  }, [posts]); // Re-run this check when the posts data has loaded
+
+  // Function to handle the arrow button clicks
+  const handleScroll = (direction: 'left' | 'right') => {
+    const el = scrollContainerRef.current;
+    if (el) {
+      // Scroll by 80% of the visible width for a nice "paging" effect
+      const scrollAmount = direction === 'left' ? -el.clientWidth * 0.8 : el.clientWidth * 0.8;
+      el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
 
 
   return (
@@ -44,38 +125,68 @@ export default async function BlogPage() {
       </section>
 
       {/* Blog Posts Section */}
-      <section className="py-20">
+       <section className="py-20">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16 animate-fade-in-up">
+          <div className="flex flex-col items-center mb-12 animate-fade-in-up">
             <h2 className="text-4xl font-bold text-gray-800 mb-6">From Our Blog</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-gray-600 max-w-3xl leading-relaxed text-center">
               Discover travel insights, destination guides, and personal stories from our community of adventurers.
             </p>
           </div>
-          
-          {posts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {posts.map((post: BlogPost, index) => (
-                <div 
-                  key={post.id} 
-                  className="animate-fade-in-up hover-lift"
-                  style={{animationDelay: `${index * 0.1}s`}}
-                >
-                  <BlogCard post={post} />
-                </div>
-              ))}
+
+     {posts.length > 0 ? (
+            <div className="relative">
+              {/* Blog Card List */}
+              <div
+                ref={scrollContainerRef}
+                className="flex overflow-x-auto space-x-8 pb-8 -mx-6 px-6 scrollbar-hide"
+              >
+                {posts.map((post: BlogPost) => {
+                  const postData = post.attributes || post;
+                  if (!postData.slug) return null;
+                  return (
+                    <Link
+                      href={`/community/${postData.slug}`}
+                      key={post.id}
+                      className="animate-fade-in-up hover-lift"
+                      aria-label={`Open blog post: ${postData.title}`}
+                    >
+                      <BlogCard post={post} />
+                    </Link>
+                  );
+                })}
+              </div>
+              {/* Centered vertical arrows for scrolling */}
+              <div className="absolute left-0 right-0 top-1/2 pointer-events-none" style={{transform: 'translateY(-50%)'}}>
+                {canScrollLeft && (
+                  <button
+                    onClick={() => handleScroll('left')}
+                    className="absolute left-2 p-3 rounded-full bg-white shadow-md hover:bg-gray-100 transition-all pointer-events-auto"
+                    style={{top: '50%', transform: 'translateY(-50%)'}}
+                    aria-label="Scroll Left"
+                  >
+                    <ChevronLeft className="w-6 h-6 text-gray-800" />
+                  </button>
+                )}
+                {canScrollRight && (
+                  <button
+                    onClick={() => handleScroll('right')}
+                    className="absolute right-2 p-3 rounded-full bg-white shadow-md hover:bg-gray-100 transition-all pointer-events-auto"
+                    style={{top: '50%', transform: 'translateY(-50%)'}}
+                    aria-label="Scroll Right"
+                  >
+                    <ChevronRight className="w-6 h-6 text-gray-800" />
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
-            <div className="text-center py-20 animate-fade-in-up">
-              <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md mx-auto">
-                <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Stories Coming Soon</h3>
+            <div className="flex flex-col items-center justify-center py-20 animate-fade-in-up">
+              <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md mx-auto flex flex-col items-center">
+                <div className="w-16 h-16 border-4 border-teal-300 border-t-emerald-500 rounded-full animate-spin mb-6"></div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Loading Stories...</h3>
                 <p className="text-gray-600 leading-relaxed">
-                  We're working on amazing travel stories and insights. Check back soon for inspiring content from our community!
+                  Please wait while we fetch the latest travel stories from our community.
                 </p>
               </div>
             </div>
@@ -102,7 +213,7 @@ export default async function BlogPage() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {testimonials.map((testimonial: TestimonialItem, index) => (
+              {testimonials.map((testimonial, index) => (
                 <div 
                   key={testimonial.id} 
                   className="animate-fade-in-up hover-lift"
@@ -115,6 +226,17 @@ export default async function BlogPage() {
           </div>
         </section>
       )}
+    {/* Render modal at the top level so it overlays the entire page, not just inside the scroll container */}
+    {activePostIndex !== null && (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 99999 }}>
+        <BlogPostModal
+          posts={posts}
+          initialPostIndex={activePostIndex}
+          onClose={closeModal}
+          onNavigate={navigateModal}
+        />
+      </div>
+    )}
     </div>
   );
 }

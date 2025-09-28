@@ -64,6 +64,7 @@ export default async function AboutPage() {
               src={getImageUrl(cover_image, 'large') || getImageUrl(cover_image)}
               alt={cover_image.alternativeText || 'About us cover image'}
               fill
+              sizes="100vw"
               style={{ objectFit: 'cover' }}
               className="z-0"
               priority
@@ -125,7 +126,7 @@ export default async function AboutPage() {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-              {team_members.map((member: TeamMember, index) => (
+              {team_members.map((member: TeamMember, index: number) => (
                 <div 
                   key={member.id} 
                   className="text-center bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift animate-fade-in-up"
@@ -140,8 +141,10 @@ export default async function AboutPage() {
                           src={imgUrl}
                           alt={member.name}
                           fill
+                          sizes="160px"
                           style={{ objectFit: 'cover' }}
                           className="rounded-full border-4 border-teal-100"
+                          priority={index < 3}
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-teal-100 to-amber-100 flex items-center justify-center text-teal-600 rounded-full border-4 border-teal-100">

@@ -10,28 +10,29 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-teal-900 text-white overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-full h-full" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }}></div>
-      </div>
-      
-      <div className="relative z-10 container mx-auto px-4 sm:px-6 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+    <footer className="relative text-white overflow-hidden" style={{
+      backgroundImage: 'url(/forest_footer.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat',
+      minHeight: '400px',
+    }}>
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900/80 via-gray-800/70 to-teal-900/80 pointer-events-none"></div>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 flex flex-col justify-center items-center">
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 text-center md:text-left">
           {/* Company Info */}
-          <div className="lg:col-span-1">
-            <h3 className="text-2xl font-bold gradient-text mb-6">Soumil Travels</h3>
-            <p className="text-gray-300 mb-6 leading-relaxed">
+          <div className="flex flex-col items-center md:items-start justify-center h-full">
+            <h3 className="text-3xl font-extrabold gradient-text mb-4">Soumil Travels</h3>
+            <p className="text-gray-200 mb-6 leading-relaxed max-w-xs">
               Crafting unforgettable journeys beyond the beaten path. Your adventure starts here.
             </p>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 justify-center md:justify-start">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
-                  className="w-10 h-10 bg-teal-600/20 rounded-full flex items-center justify-center hover:bg-teal-600/40 transition-all duration-300 hover:scale-110"
+                  className="w-10 h-10 bg-teal-600/30 rounded-full flex items-center justify-center hover:bg-teal-600/60 transition-all duration-300 hover:scale-110 shadow-lg"
                   aria-label={social.name}
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -43,7 +44,7 @@ const Footer = () => {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div className="flex flex-col items-center md:items-start justify-center h-full">
             <h3 className="text-lg font-semibold mb-6 text-white">Quick Links</h3>
             <ul className="space-y-3">
               {[
@@ -55,7 +56,7 @@ const Footer = () => {
                 <li key={link.name}>
                   <Link 
                     href={link.href} 
-                    className="text-gray-300 hover:text-teal-400 transition-all duration-300 hover:translate-x-1 inline-block"
+                    className="text-gray-200 hover:text-teal-400 transition-all duration-300 hover:translate-x-1 inline-block font-medium"
                   >
                     {link.name}
                   </Link>
@@ -64,46 +65,27 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Services */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6 text-white">Services</h3>
-            <ul className="space-y-3">
-              {[
-                'Adventure Tours',
-                'Cultural Experiences',
-                'Group Travel',
-                'Custom Itineraries'
-              ].map((service) => (
-                <li key={service}>
-                  <span className="text-gray-300 hover:text-teal-400 transition-colors duration-300 cursor-pointer">
-                    {service}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
 
           {/* Contact Info */}
-          <div>
+          <div className="flex flex-col items-center md:items-start justify-center h-full">
             <h3 className="text-lg font-semibold mb-6 text-white">Get In Touch</h3>
             <div className="space-y-4">
-              <div className="flex items-start space-x-3">
+              <div className="flex items-center space-x-3">
                 <svg className="w-5 h-5 text-teal-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <div>
-                  <p className="text-gray-300">hello@soumiltravels.com</p>
-                  <p className="text-sm text-gray-400">We&apos;ll respond within 24 hours</p>
+                  <p className="text-gray-200">hello@soumiltravels.com</p>
+                  <p className="text-sm text-gray-300">We&apos;ll respond within 24 hours</p>
                 </div>
               </div>
-              
-              <div className="flex items-start space-x-3">
+              <div className="flex items-center space-x-3">
                 <svg className="w-5 h-5 text-teal-400 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
                 <div>
-                  <p className="text-gray-300">+1 (555) 123-4567</p>
-                  <p className="text-sm text-gray-400">Mon-Fri 9AM-6PM</p>
+                  <p className="text-gray-200">+1 (555) 123-4567</p>
+                  <p className="text-sm text-gray-300">Mon-Fri 9AM-6PM</p>
                 </div>
               </div>
             </div>
@@ -111,16 +93,16 @@ const Footer = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-16 pt-8 border-t border-gray-700">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-400 text-center md:text-left">
+        <div className="mt-16 pt-8 border-t border-gray-700 w-full">
+          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 w-full">
+            <p className="text-gray-300 text-center md:text-left">
               &copy; {new Date().getFullYear()} Soumil Travels. All Rights Reserved.
             </p>
             <div className="flex space-x-6 text-sm">
-              <Link href="/privacy-policy" className="text-gray-400 hover:text-teal-400 transition-colors duration-300">
+              <Link href="/privacy-policy" className="text-gray-300 hover:text-teal-400 transition-colors duration-300">
                 Privacy Policy
               </Link>
-              <Link href="/terms-of-service" className="text-gray-400 hover:text-teal-400 transition-colors duration-300">
+              <Link href="/terms-of-service" className="text-gray-300 hover:text-teal-400 transition-colors duration-300">
                 Terms of Service
               </Link>
             </div>

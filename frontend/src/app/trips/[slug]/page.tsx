@@ -74,6 +74,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
             src={getStrapiImageUrl(featured_image)}
             alt={featured_image?.data?.attributes?.alternativeText || title}
             fill
+            sizes="100vw"
             style={{ objectFit: 'cover' }}
             priority
             className="transform scale-105 transition-transform duration-700 hover:scale-110"
@@ -209,6 +210,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
                         src={imageUrl}
                         alt={img.alternativeText || 'Trip gallery image'}
                         fill
+                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         style={{ objectFit: 'cover' }}
                         className="group-hover:scale-110 transition-transform duration-500"
                       />

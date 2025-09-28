@@ -34,6 +34,7 @@ export default function TripCard({ trip }: TripCardProps) {
             alt={featured_image?.data?.attributes?.alternativeText || title}
             width={400}
             height={300}
+            sizes="400px"
             className="w-full h-64 object-cover transition-transform duration-700 group-hover:scale-110"
           />
         ) : (

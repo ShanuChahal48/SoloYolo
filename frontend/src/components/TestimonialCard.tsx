@@ -64,8 +64,9 @@ export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
             <Image
               src={imageUrl}
               alt={traveler_name || ''}
-              layout="fill"
-              objectFit="cover"
+              fill
+              sizes="56px"
+              style={{ objectFit: 'cover' }}
               className="rounded-full"
             />
           ) : (

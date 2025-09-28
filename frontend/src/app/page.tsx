@@ -182,15 +182,20 @@ export default async function HomePage() {
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {recentPosts.map((post, index) => (
-                      <div 
-                        key={post.id} 
-                        className="animate-fade-in-up hover-lift"
-                        style={{animationDelay: `${index * 0.15}s`}}
-                      >
-                        <BlogCard post={post} />
-                      </div>
-                    ))}
+                    {recentPosts.map((post, index) => {
+                      const postData = post.attributes || post;
+                      if (!postData.slug) return null;
+                      return (
+                        <Link
+                          href={`/community/${postData.slug}`}
+                          key={post.id}
+                          className="animate-fade-in-up hover-lift"
+                          style={{animationDelay: `${index * 0.15}s`}}
+                        >
+                          <BlogCard post={post} />
+                        </Link>
+                      );
+                    })}
                 </div>
                 
                 <div className="text-center mt-16 animate-fade-in-up">

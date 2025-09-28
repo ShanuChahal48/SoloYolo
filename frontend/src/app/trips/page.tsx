@@ -21,36 +21,65 @@ export default async function TripsPage() {
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-teal-50 min-h-screen">
-      {/* Hero Section with Animation */}
-      <header className="relative bg-gradient-to-br from-teal-900 via-teal-700 to-amber-600 text-white py-24 text-center overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full animate-float"></div>
-          <div className="absolute top-40 right-20 w-24 h-24 bg-amber-400/20 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
-          <div className="absolute bottom-20 left-20 w-16 h-16 bg-teal-400/20 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
-        </div>
-        
-        <div className="relative z-10 container mx-auto px-6">
-          <div className="animate-fade-in-up">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">All Our Expeditions</h1>
-            <p className="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">
-              Discover extraordinary journeys that will take you beyond the beaten path. 
-              Each adventure is carefully crafted to create unforgettable memories.
-            </p>
+      {/* Header Image with Overlayed Title and Description */}
+      <div className="relative w-full bg-black">
+        <div className="w-full h-[220px] sm:h-[320px] md:h-[400px] lg:h-[480px] xl:h-[560px] 2xl:h-[640px] relative flex items-center justify-center">
+          <img
+            src="/desktop.adapt.1920.high.webp"
+            alt="Trips Header"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ zIndex: 1 }}
+          />
+          {/* Overlay with title and description inside the image */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2 sm:px-4 pt-20 sm:pt-24 md:pt-28 lg:pt-32" style={{ zIndex: 2 }}>
+            <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl p-3 sm:p-6 md:p-10 mx-auto">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-3 sm:mb-5 text-white">All Our Expeditions</h1>
+              <p className="text-xs sm:text-base md:text-lg text-teal-100 max-w-2xl mx-auto leading-relaxed">
+                Discover extraordinary journeys that will take you beyond the beaten path.<br />
+                Each adventure is carefully crafted to create unforgettable memories.
+              </p>
+            </div>
           </div>
         </div>
-      </header>
+      </div>
       
-      <div className="container mx-auto px-6 py-20">
-        {trips.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {trips.map((trip, index) => (
+      {/* Gap between header image and waterfall1 section */}
+  <div className="w-full" style={{ height: '40px' }}></div>
+
+      {/* First three trip cards above waterfall1.jpg, no mask */}
+      <div className="relative w-full pb-12" style={{ backgroundImage: 'url(/waterfall1.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}>
+        <div className="container mx-auto px-2 sm:px-4 pt-16 sm:pt-24 md:pt-32" style={{ position: 'relative', zIndex: 3 }}>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-8 sm:mb-12 tracking-wide drop-shadow-lg text-center" style={{textShadow: '0 2px 8px rgba(0,0,0,0.5)'}}>Events &amp; Trip</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {trips.filter(trip => trip.is_featured).map((trip, index) => (
               <div 
                 key={trip.id} 
-                className="animate-fade-in-up hover-lift"
-                style={{animationDelay: `${index * 0.1}s`}}
+                className="animate-fade-in-up flex"
+                style={{animationDelay: `${index * 0.1}s`} }
               >
-                <TripCard trip={trip} />
+                <div className="w-full max-w-md mx-auto flex flex-col">
+                  <TripCard trip={trip} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Upcoming Trips section below forest image */}
+      <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-6 sm:mb-8 text-center">Upcoming Trips</h2>
+        {trips.filter(trip => !trip.is_featured).length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {trips.filter(trip => !trip.is_featured).map((trip, index) => (
+              <div 
+                key={trip.id} 
+                className="animate-fade-in-up flex"
+                style={{animationDelay: `${index * 0.1}s`} }
+              >
+                <div className="w-full max-w-md mx-auto flex flex-col">
+                  <TripCard trip={trip} />
+                </div>
               </div>
             ))}
           </div>
