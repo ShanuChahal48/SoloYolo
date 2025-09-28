@@ -3,7 +3,7 @@ import { StrapiMedia } from '@/types'; // Assuming you have a types file
 import Image from 'next/image';
 import { marked } from 'marked';
 
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
 interface TeamMember {
   id: number;

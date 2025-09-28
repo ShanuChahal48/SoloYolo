@@ -15,7 +15,8 @@ const getImageUrl = (
   const attrs = mediaObj?.attributes;
   const viaAttrs = attrs?.formats?.[format]?.url || attrs?.url;
   const url = direct || viaAttrs || '';
-  return url ? `${STRAPI_URL}${url}` : '';
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {

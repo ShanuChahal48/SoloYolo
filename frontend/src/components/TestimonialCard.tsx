@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { StrapiMedia } from '@/types';
 
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL|| 'http://localhost:1337';
 
 // Star SVG component for rating
 const StarIcon = ({ filled }: { filled: boolean }) => (
@@ -53,7 +53,7 @@ export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
     media = picture as StrapiMedia;
   }
   const rawUrl = media?.formats?.thumbnail?.url || media?.url || '';
-  const imageUrl = rawUrl ? `${STRAPI_URL}${rawUrl}` : '';
+  const imageUrl = rawUrl ? (rawUrl.startsWith('http') ? rawUrl : `${STRAPI_URL}${rawUrl}`) : '';
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg flex flex-col h-full">

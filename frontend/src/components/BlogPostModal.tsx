@@ -8,7 +8,7 @@ import { StrapiMedia } from '@/types'; // Assuming types file exists
 import { X, ArrowLeft, ArrowRight } from 'lucide-react';
 import { marked } from 'marked';
 
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
 interface BlogPostModalProps {
   posts: BlogPost[];
@@ -42,7 +42,8 @@ export default function BlogPostModal(props: BlogPostModalProps) {
         }
       }
     }
-    return url ? `${STRAPI_URL}${url}` : '';
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
   };
 
   const { title, content, publishedAt, cover_image, author } = post.attributes || {};

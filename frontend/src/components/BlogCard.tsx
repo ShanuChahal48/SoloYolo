@@ -3,7 +3,7 @@ import Image from 'next/image';
 // import Link from 'next/link';
 import { StrapiMedia } from '@/types'; // Assuming types file exists
 
-const STRAPI_URL = process.env.STRAPI_URL || 'http://localhost:1337';
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
 interface BlogCardAttributesShape {
   title: string;
@@ -44,7 +44,8 @@ const getImageUrl = (
       }
     }
   }
-  return url ? `${STRAPI_URL}${url}` : '';
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
 export default function BlogCard({ post }: BlogCardProps) {

@@ -32,11 +32,8 @@ const getStrapiImageUrl = (
     url = mediaObject.attributes.url;
   }
 
-  if (url) {
-    return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
-  }
-
-  return '';
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
 export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {

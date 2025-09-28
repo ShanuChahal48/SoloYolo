@@ -9,11 +9,11 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
 
   const { title, content, cover_image, author, publishedAt } = post.attributes;
   const imageUrl = cover_image?.data?.attributes?.url
-    ? `${process.env.STRAPI_URL || 'http://localhost:1337'}${cover_image.data.attributes.url}`
+    ? `${process.env.NEXT_PUBLIC_STRAPI_URL|| 'http://localhost:1337'}${cover_image.data.attributes.url}`
     : '';
   const authorData = author?.data?.attributes;
   const authorPic = authorData?.picture?.data?.attributes?.url
-    ? `${process.env.STRAPI_URL || 'http://localhost:1337'}${authorData.picture.data.attributes.url}`
+    ? `${process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'}${authorData.picture.data.attributes.url}`
     : '';
   const contentHtml = content ? marked.parse(content) : '';
 
