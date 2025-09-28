@@ -12,7 +12,7 @@ export default function HomePage() {
       <section className="h-screen bg-gray-900 text-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-4">
-            Soumil Travels
+            Solo Yolo
           </h1>
           <p className="text-xl md:text-2xl text-gray-300">
             Journeys Beyond the Ordinary.

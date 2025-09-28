@@ -23,7 +23,7 @@ const Footer = () => {
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 text-center md:text-left">
           {/* Company Info */}
           <div className="flex flex-col items-center md:items-start justify-center h-full">
-            <h3 className="text-3xl font-extrabold gradient-text mb-4">Soumil Travels</h3>
+            <h3 className="text-3xl font-extrabold gradient-text mb-4">Solo Yolo</h3>
             <p className="text-gray-200 mb-6 leading-relaxed max-w-xs">
               Crafting unforgettable journeys beyond the beaten path. Your adventure starts here.
             </p>
@@ -75,7 +75,7 @@ const Footer = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
                 <div>
-                  <p className="text-gray-200">hello@soumiltravels.com</p>
+                  <p className="text-gray-200">soloyoloindia@gmail.com</p>
                   <p className="text-sm text-gray-300">We&apos;ll respond within 24 hours</p>
                 </div>
               </div>
@@ -96,7 +96,7 @@ const Footer = () => {
         <div className="mt-16 pt-8 border-t border-gray-700 w-full">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 w-full">
             <p className="text-gray-300 text-center md:text-left">
-              &copy; {new Date().getFullYear()} Soumil Travels. All Rights Reserved.
+              &copy; {new Date().getFullYear()} SoloYolo. All Rights Reserved.
             </p>
             <div className="flex space-x-6 text-sm">
               <Link href="/privacy-policy" className="text-gray-300 hover:text-teal-400 transition-colors duration-300">
