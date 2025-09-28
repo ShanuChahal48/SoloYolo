@@ -58,7 +58,7 @@ const Header = () => {
             isScrolled ? 'gradient-text' : 'text-white drop-shadow-lg'
           }`}
         >
-          Soumil Travels
+          Solo Yolo
         </Link>
         
         {/* Desktop Navigation */}

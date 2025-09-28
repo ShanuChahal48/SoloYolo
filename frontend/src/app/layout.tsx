@@ -17,7 +17,7 @@ const inter = Inter({
 // });
 
 export const metadata: Metadata = {
-  title: "Soumil Travels - Offbeat Journeys for the Modern Explorer",
+  title: "Solo YoloS - Offbeat Journeys for the Modern Explorer",
   description: "Curated travel experiences to unconventional destinations. Join a community of passionate travelers.",
 };
 
