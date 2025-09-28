@@ -5,7 +5,8 @@ import { } from '@/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 
-// Helper function to get a clean image URL
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
 const getStrapiImageUrl = (
   mediaObject:
     | { url?: string; formats?: Record<string, { url?: string }> }
@@ -15,35 +16,26 @@ const getStrapiImageUrl = (
   format: 'large' | 'medium' | 'small' | 'thumbnail' = 'large'
 ) => {
   if (!mediaObject) return '';
-  
-  // Direct url (for gallery items)
+
+  let url = '';
+
+  // Direct url
   if ('url' in mediaObject && mediaObject.url) {
-    return `http://localhost:1337${mediaObject.url}`;
+    url = mediaObject.url;
   }
-  
-  // Direct formats (for gallery items)
-  if ('formats' in mediaObject && mediaObject.formats) {
-    if (mediaObject.formats[format]?.url) {
-      return `http://localhost:1337${mediaObject.formats[format].url}`;
-    }
-    // Fallback to any available format
-    for (const key of ['large', 'medium', 'small', 'thumbnail'] as const) {
-      if (mediaObject.formats[key]?.url) {
-        return `http://localhost:1337${mediaObject.formats[key].url}`;
-      }
-    }
+  // Nested data.attributes
+  else if ('data' in mediaObject && mediaObject.data?.attributes?.url) {
+    url = mediaObject.data.attributes.url;
   }
-  
-  // Nested data.attributes (for featured_image)
-  const attrs = (mediaObject as import('@/types').StrapiMedia).attributes;
-  if (attrs?.url) return `http://localhost:1337${attrs.url}`;
-  if (attrs?.formats?.[format]?.url) return `http://localhost:1337${attrs.formats[format].url}`;
-  const fmt = attrs?.formats;
-  if (fmt) {
-    for (const key of ['large', 'medium', 'small', 'thumbnail'] as const) {
-      if (fmt[key]?.url) return `http://localhost:1337${fmt[key]?.url}`;
-    }
+  // Direct attributes
+  else if ('attributes' in mediaObject && mediaObject.attributes?.url) {
+    url = mediaObject.attributes.url;
   }
+
+  if (url) {
+    return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
+  }
+
   return '';
 };
 
