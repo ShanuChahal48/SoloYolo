@@ -11,8 +11,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'https://soloyolo.onrender.com',
-        port: '',
+        hostname: 'soloyolo.onrender.com',
         pathname: '/uploads/**',
       },
     ],
