@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         hostname: 'soloyolo.onrender.com',
         pathname: '/uploads/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
     ],
   },
 };
