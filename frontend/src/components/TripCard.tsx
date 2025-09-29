@@ -20,9 +20,14 @@ export default function TripCard({ trip }: TripCardProps) {
   
   let imageUrl = undefined;
   if (featured_image?.url) {
-    imageUrl = STRAPI_URL + featured_image.url;
+    imageUrl = featured_image.url.startsWith('http')
+      ? featured_image.url
+      : STRAPI_URL + featured_image.url;
   } else if (featured_image?.data?.attributes?.url) {
-    imageUrl = STRAPI_URL + featured_image.data.attributes.url;
+    const url = featured_image.data.attributes.url;
+    imageUrl = url.startsWith('http')
+      ? url
+      : STRAPI_URL + url;
   }
 
   return (
