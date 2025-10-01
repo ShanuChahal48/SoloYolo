@@ -109,11 +109,11 @@ export default async function AboutPage() {
       </section>
 
       {/* Main Content Section */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-teal-50">
+      <section className="py-20">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="animate-fade-in-up">
             <article 
-              className="prose lg:prose-xl mx-auto prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-teal-600 prose-strong:text-gray-900"
+              className="prose lg:prose-xl mx-auto prose-invert prose-a:text-teal-400 prose-hr:border-teal-700 prose-li:marker:text-teal-500"
               dangerouslySetInnerHTML={{ __html: contentHtml }}
             />
           </div>
@@ -122,15 +122,15 @@ export default async function AboutPage() {
 
       {/* Team Section */}
       {team_members && team_members.length > 0 && (
-        <section className="relative bg-white py-24 overflow-hidden">
+  <section className="relative py-24 overflow-hidden">
           {/* Background Elements */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-teal-100 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-100 to-transparent rounded-full translate-y-40 -translate-x-40"></div>
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-teal-500/10 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-full translate-y-40 -translate-x-40"></div>
           
           <div className="relative z-10 container mx-auto px-6">
             <div className="text-center mb-16 animate-fade-in-up">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-800 mb-6">{team_section_title}</h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">{team_section_title}</h2>
+              <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 Meet the passionate individuals who make our adventures possible.
               </p>
             </div>
@@ -139,7 +139,7 @@ export default async function AboutPage() {
               {team_members.map((member: TeamMember, index: number) => (
                 <div 
                   key={member.id} 
-                  className="text-center bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift animate-fade-in-up"
+                  className="text-center bg-slate-800/50 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift animate-fade-in-up"
                   style={{animationDelay: `${index * 0.1}s`}}
                 >
                   <div className="relative w-40 h-40 mx-auto mb-6">
@@ -153,11 +153,11 @@ export default async function AboutPage() {
                           fill
                           sizes="160px"
                           style={{ objectFit: 'cover' }}
-                          className="rounded-full border-4 border-teal-100"
+                          className="rounded-full border-4 border-teal-400/50"
                           priority={index < 3}
                         />
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-teal-100 to-amber-100 flex items-center justify-center text-teal-600 rounded-full border-4 border-teal-100">
+                        <div className="w-full h-full bg-gradient-to-br from-teal-800 to-amber-800 flex items-center justify-center text-teal-400 rounded-full border-4 border-teal-400/50">
                           <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                           </svg>
@@ -165,8 +165,8 @@ export default async function AboutPage() {
                       );
                     })()}
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">{member.name}</h3>
-                  <p className="text-teal-600 font-medium">{member.role}</p>
+                  <h3 className="text-2xl font-bold text-white mb-2">{member.name}</h3>
+                  <p className="text-teal-400 font-medium">{member.role}</p>
                 </div>
               ))}
             </div>

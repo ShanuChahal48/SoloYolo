@@ -53,39 +53,39 @@ export default async function ContactPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                         {/* Contact Info Section */}
                         <div className="space-y-8 animate-fade-in-up">
-                            <h2 className="text-4xl font-bold text-gray-800">Get in Touch</h2>
-                            <p className="text-lg text-gray-600 leading-relaxed">
+                            <h2 className="text-4xl font-bold text-white">Get in Touch</h2>
+                            <p className="text-lg text-gray-300 leading-relaxed">
                                 Fill up the form and our team will get back to you within 24 hours. You can also reach us through the contact details below.
                             </p>
                             
                             <div className="space-y-6">
-                                <div className="flex items-start space-x-4 p-6 bg-white rounded-xl shadow-lg hover-lift transition-all duration-300">
-                                    <div className="p-3 bg-teal-100 rounded-full">
-                                        <Mail className="text-teal-600 h-6 w-6" />
+                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300">
+                                    <div className="p-3 bg-teal-500/20 rounded-full">
+                                        <Mail className="text-teal-400 h-6 w-6" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 text-lg">Email</h3>
-                                        <a href={`mailto:${attributes.email}`} className="text-gray-600 hover:text-teal-600 transition-colors duration-300">{attributes.email}</a>
+                                        <h3 className="font-semibold text-white text-lg">Email</h3>
+                                        <a href={`mailto:${attributes.email}`} className="text-gray-300 hover:text-teal-400 transition-colors duration-300">{attributes.email}</a>
                                     </div>
                                 </div>
 
-                                <div className="flex items-start space-x-4 p-6 bg-white rounded-xl shadow-lg hover-lift transition-all duration-300">
-                                    <div className="p-3 bg-teal-100 rounded-full">
-                                        <Phone className="text-teal-600 h-6 w-6" />
+                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300">
+                                    <div className="p-3 bg-teal-500/20 rounded-full">
+                                        <Phone className="text-teal-400 h-6 w-6" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 text-lg">Phone</h3>
-                                        <a href={`tel:${attributes.phone}`} className="text-gray-600 hover:text-teal-600 transition-colors duration-300">{attributes.phone}</a>
+                                        <h3 className="font-semibold text-white text-lg">Phone</h3>
+                                        <a href={`tel:${attributes.phone}`} className="text-gray-300 hover:text-teal-400 transition-colors duration-300">{attributes.phone}</a>
                                     </div>
                                 </div>
                                 
-                                <div className="flex items-start space-x-4 p-6 bg-white rounded-xl shadow-lg hover-lift transition-all duration-300">
-                                    <div className="p-3 bg-teal-100 rounded-full">
-                                        <MapPin className="text-teal-600 h-6 w-6" />
+                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300">
+                                    <div className="p-3 bg-teal-500/20 rounded-full">
+                                        <MapPin className="text-teal-400 h-6 w-6" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-800 text-lg">Office Address</h3>
-                                        <p className="text-gray-600 whitespace-pre-line leading-relaxed">{attributes.address}</p>
+                                        <h3 className="font-semibold text-white text-lg">Office Address</h3>
+                                        <p className="text-gray-300 whitespace-pre-line leading-relaxed">{attributes.address}</p>
                                     </div>
                                 </div>
                             </div>
