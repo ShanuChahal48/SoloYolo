@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { getTestimonials, getBlogPosts } from '@/lib/api';
 import FeaturedTrips from '@/components/FeaturedTrips';
 import TestimonialCard from '@/components/TestimonialCard';
@@ -77,7 +78,14 @@ export default async function HomePage() {
         </div>
           {/* Tree Divider Overlapping Bottom of Hero Image */}
           <div className="absolute left-0 right-0 bottom-0 w-full overflow-visible pointer-events-none" style={{lineHeight: 0}}>
-            <img src="/mountain-divider.svg" alt="Section divider" className="w-full h-auto block" />
+            <Image 
+              src="/mountain-divider.svg" 
+              alt="Section divider" 
+              className="w-full h-auto block" 
+              width={1920} 
+              height={200} 
+              priority
+            />
           </div>
 
       {/* --- Featured Trips Section --- */}
@@ -135,15 +143,15 @@ export default async function HomePage() {
       {recentPosts.length > 0 && (
          <section className="bg-transparent py-24 relative overflow-hidden">
             {/* Background Elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-500/10 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-500/10 to-transparent rounded-full translate-y-40 -translate-x-40"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-emerald-100 to-transparent rounded-full -translate-y-48 translate-x-48"></div>
+            <div className="absolute bottom-0 left-0 w-80 h-80 bg-gradient-to-tr from-amber-100 to-transparent rounded-full translate-y-40 -translate-x-40"></div>
             
             <div className="relative z-10 container mx-auto px-6">
                 <div className="text-center mb-16 animate-fade-in-up">
                     <h2 className="text-responsive-2xl font-serif font-bold text-slate-100 mb-6">
                       Stories from the Road
                     </h2>
-                    <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                    <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
                       Get inspired for your next journey with our latest articles and travel tips.
                     </p>
                 </div>
@@ -168,7 +176,7 @@ export default async function HomePage() {
                 <div className="text-center mt-16 animate-fade-in-up">
                     <Link 
                       href="/community" 
-                      className="inline-flex items-center text-teal-400 font-semibold hover:text-white transition-all duration-300 group"
+                      className="inline-flex items-center text-emerald-600 font-semibold hover:text-emerald-800 transition-all duration-300 group"
                     >
                       Read More on Our Community Hub 
                       <svg className="ml-2 w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

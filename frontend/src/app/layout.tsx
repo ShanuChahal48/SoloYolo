@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -11,11 +11,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-// const playfairDisplay = Playfair_Display({
-//   subsets: ['latin'],
-//   variable: '--font-serif', // Matches your CSS variable
-//   display: 'swap',
-// });
+// Removed unused Playfair_Display font to eliminate lint warning.
 
 export const metadata: Metadata = {
   title: "Solo YoloS - Offbeat Journeys for the Modern Explorer",

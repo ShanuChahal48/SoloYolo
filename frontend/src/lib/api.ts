@@ -155,14 +155,4 @@ export async function getFeaturedTrips() {
     const res = await fetchApi('/trips', query);
     return res?.data || [];
 }
- export function getStrapiMediaUrl(url: string | undefined, format?: 'thumbnail' | 'small' | 'medium' | 'large') {
-        if (!url) {
-            return '';
-        }
-        // If the URL is already absolute (contains http), return it directly.
-        if (url.startsWith('http')) {
-            return url;
-        }
-        // Otherwise, prepend the Strapi URL.
-        return `${STRAPI_URL}${url}`;
-    }
+// Deprecated: media URL helper moved to '@/lib/media'

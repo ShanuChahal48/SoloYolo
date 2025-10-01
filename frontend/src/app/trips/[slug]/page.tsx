@@ -4,52 +4,29 @@ import { getTripBySlug } from '@/lib/api';
 import { } from '@/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
+// Removed unused Link import
 import BookingButton from '@/components/BookingButton';
 import { resolveServerSideBookingLink } from '@/lib/logoutWorld';
+import { getMediaUrl, getMediaAlt, extractMediaAttributes, StrapiMedia } from '@/lib/media';
 import React from 'react';
 
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+// STRAPI_URL removed (media helpers construct absolute URLs)
 
-const getStrapiImageUrl = (
-  mediaObject:
-    | { url?: string; formats?: Record<string, { url?: string }> }
-    | { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } }
-    | { attributes?: { url?: string; formats?: Record<string, { url?: string }> } }
-    | undefined,
-  format: 'large' | 'medium' | 'small' | 'thumbnail' = 'large'
-) => {
-  if (!mediaObject) return '';
-
-  let url = '';
-
-  // Direct url
-  if ('url' in mediaObject && mediaObject.url) {
-    url = mediaObject.url;
-  }
-  // Nested data.attributes
-  else if ('data' in mediaObject && mediaObject.data?.attributes?.url) {
-    url = mediaObject.data.attributes.url;
-  }
-  // Direct attributes
-  else if ('attributes' in mediaObject && mediaObject.attributes?.url) {
-    url = mediaObject.attributes.url;
-  }
-
-  if (!url) return '';
-  return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
-};
+// Removed unused getStrapiImageUrl helper (replaced by getMediaUrl)
 
 // Strapi trip attribute shape (extend as needed)
+type ItineraryBlock = { type: string; children?: { text: string }[] };
+type ItineraryValue = string | ItineraryBlock[] | null | undefined;
+
 interface TripAttributes {
   title: string;
   price: number;
   duration: string;
   category?: string;
-  itinerary?: unknown;
-  featured_image?: any; // Strapi upload media object
-  gallery?: any;
+  itinerary?: ItineraryValue;
+  featured_image?: StrapiMedia;
+  gallery?: StrapiMedia[];
   slug?: string;
   booking_url?: string | null;
   booking_url_verified?: boolean;
@@ -57,8 +34,15 @@ interface TripAttributes {
 
 type TripEntity = { id: number; attributes: TripAttributes } | (TripAttributes & { id?: number });
 
-export default async function TripDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+function hasAttributes(entity: TripEntity | null | undefined): entity is { id: number; attributes: TripAttributes } {
+  return !!entity && typeof entity === 'object' && 'attributes' in entity && typeof (entity as { attributes?: unknown }).attributes === 'object';
+}
+
+// Media helpers now imported from '@/lib/media'
+
+// NOTE: Using Promise-wrapped params to align with current inferred PageProps constraint
+export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   const trip = await getTripBySlug(slug);
 
   if (!trip) {
@@ -66,8 +50,8 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
   }
 
   // Extract attributes whether Strapi returned nested or flattened structure
-  const rawAttributes: TripAttributes = (trip as TripEntity && 'attributes' in (trip as any))
-    ? (trip as any).attributes
+  const rawAttributes: TripAttributes = hasAttributes(trip as TripEntity)
+    ? (trip as { attributes: TripAttributes }).attributes
     : (trip as TripAttributes);
 
   const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug, booking_url, booking_url_verified } = rawAttributes;
@@ -103,10 +87,10 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
     >
       {/* Hero Section with Featured Image */}
       <div className="relative h-[70vh] w-full overflow-hidden">
-        {getStrapiImageUrl(featured_image) ? (
+        {getMediaUrl(featured_image) ? (
           <Image
-            src={getStrapiImageUrl(featured_image)}
-            alt={featured_image?.data?.attributes?.alternativeText || title}
+            src={getMediaUrl(featured_image)}
+            alt={getMediaAlt(featured_image, title)}
             fill
             sizes="100vw"
             style={{ objectFit: 'cover' }}
@@ -241,18 +225,19 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
               </p>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {gallery.map((img: { id: number; alternativeText?: string; url?: string; formats?: Record<string, { url?: string }> }, index) => {
-                const imageUrl = getStrapiImageUrl(img, 'small');
+              {gallery.map((img: StrapiMedia, index) => {
+                const imageUrl = getMediaUrl(img);
+                const attrs = extractMediaAttributes(img);
                 return (
                   <div 
-                    key={img.id} 
+                    key={attrs?.url ? `${attrs.url}-${index}` : index} 
                     className="relative aspect-square rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift animate-fade-in-up group"
                     style={{animationDelay: `${index * 0.1}s`}}
                   >
                     {imageUrl ? (
                       <Image
                         src={imageUrl}
-                        alt={img.alternativeText || 'Trip gallery image'}
+                        alt={attrs?.alternativeText || 'Trip gallery image'}
                         fill
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         style={{ objectFit: 'cover' }}

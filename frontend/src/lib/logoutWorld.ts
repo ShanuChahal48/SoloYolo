@@ -83,15 +83,19 @@ export interface ServerResolvedBookingLink {
 }
 
 export async function resolveServerSideBookingLink(opts: LogoutWorldOptions): Promise<ServerResolvedBookingLink> {
-  const { candidate, overridden, searchUrl } = resolveLogoutWorldUrl(opts);
+  const { candidate, /* overridden */ searchUrl } = resolveLogoutWorldUrl(opts);
   if (!externalBookingEnabled()) {
     return { primary: '#', fallback: searchUrl, usingFallback: true, validated: false };
   }
   // If overridden we trust the mapping but still attempt validation.
-  const head = await validateExternalUrlHead(candidate).catch(() => ({ ok: false }));
+  let head: { ok: boolean; status?: number };
+  try {
+    head = await validateExternalUrlHead(candidate);
+  } catch {
+    head = { ok: false };
+  }
   if (head.ok) {
     return { primary: candidate, fallback: searchUrl, usingFallback: false, validated: true, status: head.status };
   }
-  // fallback to search listing
   return { primary: searchUrl, fallback: searchUrl, usingFallback: true, validated: false, status: head.status };
 }

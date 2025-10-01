@@ -15,7 +15,7 @@ type Status = 'idle' | 'checking' | 'ok' | 'fallback' | 'disabled' | 'error';
 export const BookingButton: React.FC<BookingButtonProps> = ({ title, internalSlug, className, directUrl }) => {
   const [status, setStatus] = useState<Status>('idle');
   const [targetUrl, setTargetUrl] = useState<string>('');
-  const [searchUrl, setSearchUrl] = useState<string>('');
+  // searchUrl no longer separately stored; we only keep the active targetUrl
 
   useEffect(() => {
     // If a directUrl is supplied we trust it & bypass remote checks.
@@ -30,9 +30,8 @@ export const BookingButton: React.FC<BookingButtonProps> = ({ title, internalSlu
       setStatus('disabled');
       return;
     }
-    const { candidate, searchUrl: sUrl } = resolveLogoutWorldUrl({ title, internalSlug });
+  const { candidate, searchUrl: sUrl } = resolveLogoutWorldUrl({ title, internalSlug });
     setTargetUrl(candidate);
-    setSearchUrl(sUrl);
     setStatus('checking');
 
     // HEAD request to validate candidate. If 404 -> fallback to searchUrl.
@@ -59,7 +58,7 @@ export const BookingButton: React.FC<BookingButtonProps> = ({ title, internalSlu
       clearTimeout(timer);
       controller.abort();
     };
-  }, [title, internalSlug]);
+  }, [title, internalSlug, directUrl]);
 
   const label = (() => {
     switch (status) {

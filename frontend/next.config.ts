@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from 'path';
 
 const nextConfig: NextConfig = {
   images: {
@@ -21,6 +22,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Help Next.js know the monorepo root to avoid lockfile ambiguity warnings
+  outputFileTracingRoot: path.join(__dirname, '..', '..'),
 };
 
 export default nextConfig;

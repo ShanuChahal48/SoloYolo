@@ -19,6 +19,7 @@ const getImageUrl = (
   return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
+// NOTE: Using Promise-wrapped params to align with current PageProps constraint in project setup
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);

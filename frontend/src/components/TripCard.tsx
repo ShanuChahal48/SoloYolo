@@ -1,12 +1,13 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Trip } from '@/types';
+import { getMediaUrl, extractMediaAttributes, StrapiMedia } from '@/lib/media';
 
 interface TripCardProps {
   trip: Trip;
 }
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+// STRAPI_URL not needed directly; media helpers build absolute URLs.
 
 export default function TripCard({ trip }: TripCardProps) {
   if (!trip) {
@@ -18,17 +19,15 @@ export default function TripCard({ trip }: TripCardProps) {
   }
   const { title, slug, price, duration, excerpt, featured_image, category } = trip;
   
-  let imageUrl = undefined;
-  if (featured_image?.url) {
-    imageUrl = featured_image.url.startsWith('http')
-      ? featured_image.url
-      : STRAPI_URL + featured_image.url;
-  } else if (featured_image?.data?.attributes?.url) {
-    const url = featured_image.data.attributes.url;
-    imageUrl = url.startsWith('http')
-      ? url
-      : STRAPI_URL + url;
+  let media: StrapiMedia | undefined;
+  if (featured_image?.data) {
+    const alt = featured_image.data.alternativeText || undefined;
+    media = { data: { id: featured_image.data.id, attributes: { url: featured_image.data.url, alternativeText: alt } } };
+  } else if (featured_image?.url) {
+    media = { url: featured_image.url };
   }
+  const imageUrl = getMediaUrl(media);
+  const mediaAttrs = extractMediaAttributes(media);
 
   return (
   <Link href={`/trips/${slug}`} className="group block overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 bg-black/60 hover-lift backdrop-blur-sm">
@@ -36,7 +35,7 @@ export default function TripCard({ trip }: TripCardProps) {
         {imageUrl ? (
           <Image
             src={imageUrl}
-            alt={featured_image?.data?.attributes?.alternativeText || title}
+            alt={mediaAttrs?.alternativeText || title}
             width={400}
             height={300}
             sizes="400px"

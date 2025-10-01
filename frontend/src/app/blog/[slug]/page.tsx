@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import Image from 'next/image';
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = await getPostBySlug(params.slug);
+// NOTE: Using Promise-wrapped params to align with existing project typing expectations elsewhere
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = await getPostBySlug(slug);
   if (!post || !post.attributes) return notFound();
 
   const { title, content, cover_image, author, publishedAt } = post.attributes;
