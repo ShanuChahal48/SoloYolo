@@ -41,23 +41,40 @@ const getStrapiImageUrl = (
   return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
-export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+// Strapi trip attribute shape (extend as needed)
+interface TripAttributes {
+  title: string;
+  price: number;
+  duration: string;
+  category?: string;
+  itinerary?: unknown;
+  featured_image?: any; // Strapi upload media object
+  gallery?: any;
+  slug?: string;
+  booking_url?: string | null;
+  booking_url_verified?: boolean;
+}
+
+type TripEntity = { id: number; attributes: TripAttributes } | (TripAttributes & { id?: number });
+
+export default async function TripDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const trip = await getTripBySlug(slug);
 
   if (!trip) {
     notFound();
   }
 
-  const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug } = trip as typeof trip & { slug?: string };
+  // Extract attributes whether Strapi returned nested or flattened structure
+  const rawAttributes: TripAttributes = (trip as TripEntity && 'attributes' in (trip as any))
+    ? (trip as any).attributes
+    : (trip as TripAttributes);
 
-  // If Strapi provides a confirmed booking_url, prefer it and skip guessing.
-  // The trip object shape from Strapi: { attributes: { ...fields } } or flattened (depending on earlier usage)
-  // Current code seems to return data[0] (which likely has 'attributes'), so attempt both.
-  // @ts-ignore - be defensive
-  const rawAttributes = (trip.attributes ? trip.attributes : trip) as any;
-  const confirmedBookingUrl: string | undefined = rawAttributes.booking_url || undefined;
-  const confirmedVerified: boolean = !!rawAttributes.booking_url_verified;
+  const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug, booking_url, booking_url_verified } = rawAttributes;
+
+  // Prefer confirmed booking URL if verified
+  const confirmedBookingUrl: string | undefined = booking_url || undefined;
+  const confirmedVerified: boolean = !!booking_url_verified;
 
   // Server-side booking link resolution (HEAD validates & may fallback) for SEO and structured data.
   const bookingLink = confirmedBookingUrl && confirmedVerified
