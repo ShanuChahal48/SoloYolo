@@ -19,7 +19,6 @@ const getImageUrl = (
   return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
-// NOTE: Using Promise-wrapped params to align with current PageProps constraint in project setup
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
@@ -29,16 +28,59 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   }
 
   const postData = (post as { attributes?: import('@/types').BlogPostAttributes }).attributes ?? post;
-  const { title, content, publishedAt, cover_image, author } = postData as import('@/types').BlogPostAttributes;
-  const media = (cover_image?.data ?? cover_image) as import('@/types').StrapiMedia;
-  const contentHtml = marked.parse(content);
-    const authorAttributes = author?.data?.attributes ?? undefined;
-    const authorPic = authorAttributes?.picture?.data?.attributes ?? undefined;
-    const authorImageUrl = authorPic?.formats?.thumbnail?.url
-      ? `${STRAPI_URL}${authorPic.formats.thumbnail.url}`
-      : authorPic?.url
-      ? `${STRAPI_URL}${authorPic.url}`
-      : '';
+    const { title, content, publishedAt, cover_image, author } = postData as import('@/types').BlogPostAttributes;
+    const media = (cover_image?.data ?? cover_image) as import('@/types').StrapiMedia;
+    const contentHtml = marked.parse(content);
+
+    // --- Author Normalization (supports flattened or nested) ---
+    const authorNode: any = (author as any)?.data?.attributes || author || null;
+    const authorAttributes = authorNode || undefined;
+    const pictureAttrs = authorNode?.picture?.data?.attributes || authorNode?.picture?.attributes || authorNode?.picture || null;
+    const picFormats = pictureAttrs?.formats || {};
+    const picRel = picFormats?.thumbnail?.url || picFormats?.small?.url || pictureAttrs?.url || '';
+    const authorImageUrl = picRel ? (picRel.startsWith('http') ? picRel : `${STRAPI_URL}${picRel}`) : '';
+
+    // --- Article JSON-LD ---
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    const canonicalUrl = `${siteUrl}/community/${slug}`;
+    const rawContent = content || '';
+    const plainExcerpt = rawContent
+      .replace(/```[\s\S]*?```/g, ' ')
+      .replace(/`[^`]*`/g, ' ')
+      .replace(/[#>*_~\-]/g, ' ')
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 220);
+    const coverMedia = media?.attributes || (media as any) || null;
+    const coverFormats = coverMedia?.formats || {};
+    const coverUrlRel = coverFormats?.large?.url || coverFormats?.medium?.url || coverFormats?.small?.url || coverMedia?.url || '';
+    const absoluteImage = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI_URL}${coverUrlRel}`) : '';
+    const absoluteAuthorPic = authorImageUrl && !authorImageUrl.startsWith('http') ? `${siteUrl}${authorImageUrl}` : authorImageUrl;
+    const articleJsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+      headline: title,
+      description: plainExcerpt,
+      image: absoluteImage ? [absoluteImage] : undefined,
+      author: authorAttributes?.name
+        ? {
+            '@type': 'Person',
+            name: authorAttributes.name,
+            ...(authorAttributes?.title ? { jobTitle: authorAttributes.title } : {}),
+            ...(absoluteAuthorPic ? { image: absoluteAuthorPic } : {}),
+          }
+        : undefined,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Solo Yolo',
+        logo: { '@type': 'ImageObject', url: `${siteUrl}/vercel.svg` },
+      },
+      datePublished: publishedAt || undefined,
+      dateModified: publishedAt || undefined,
+    };
 
   return (
     <div
@@ -108,6 +150,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               </div>
               <div className="text-left">
                   <p className="font-semibold text-white">{authorAttributes?.name || ''}</p>
+                  {authorAttributes?.title && (
+                    <p className="text-xs text-teal-300/90 mb-1">{authorAttributes.title}</p>
+                  )}
                 <p className="text-sm text-teal-200">
                   {new Date(publishedAt).toLocaleDateString('en-US', {
                     year: 'numeric',

@@ -3,21 +3,76 @@ import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import Image from 'next/image';
 
-// NOTE: Using Promise-wrapped params to align with existing project typing expectations elsewhere
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const post = await getPostBySlug(slug);
-  if (!post || !post.attributes) return notFound();
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await getPostBySlug(params.slug);
+  if (!post) return notFound();
 
-  const { title, content, cover_image, author, publishedAt } = post.attributes;
-  const imageUrl = cover_image?.data?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL|| 'http://localhost:1337'}${cover_image.data.attributes.url}`
-    : '';
-  const authorData = author?.data?.attributes;
-  const authorPic = authorData?.picture?.data?.attributes?.url
-    ? `${process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'}${authorData.picture.data.attributes.url}`
-    : '';
+  // Support both Strapi shapes: legacy (attributes wrapper) & flattened
+  const postData: any = (post as any).attributes ? (post as any).attributes : post;
+  const { title, content, cover_image, author, publishedAt } = postData;
+  const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+
+  // Cover image (handle either cover_image.data.attributes.url or direct url/formats)
+  const coverMedia = cover_image?.data?.attributes || cover_image?.attributes || cover_image || null;
+  const coverFormats = coverMedia?.formats || {};
+  const coverUrlRel = coverFormats?.large?.url || coverFormats?.medium?.url || coverFormats?.small?.url || coverMedia?.url || '';
+  const imageUrl = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI}${coverUrlRel}`) : '';
+
+  // Author normalization (direct object OR relation object with data)
+  const authorNode: any = (author as any)?.data?.attributes || author || null;
+  const pictureAttrs = authorNode?.picture?.data?.attributes || authorNode?.picture?.attributes || authorNode?.picture || null;
+  const picFormats = pictureAttrs?.formats || {};
+  const chosenPic = picFormats?.thumbnail?.url || picFormats?.small?.url || pictureAttrs?.url || '';
+  const authorPic = chosenPic ? (chosenPic.startsWith('http') ? chosenPic : `${STRAPI}${chosenPic}`) : '';
+  const authorName = authorNode?.name || '';
+  const authorTitle = authorNode?.title || '';
+
   const contentHtml = content ? marked.parse(content) : '';
+
+  // --- Article JSON-LD ---
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const canonicalUrl = `${siteUrl}/blog/${params.slug}`;
+  const rawContent = content || '';
+  const plainExcerpt = rawContent
+    .replace(/```[\s\S]*?```/g, ' ') // remove code blocks
+    .replace(/`[^`]*`/g, ' ') // inline code
+    .replace(/[#>*_~\-]/g, ' ') // markdown syntax
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
+    .replace(/\s+/g, ' ') // collapse whitespace
+    .trim()
+    .slice(0, 220);
+  const absoluteImage = imageUrl && !imageUrl.startsWith('http') ? `${siteUrl}${imageUrl}` : imageUrl;
+  const absoluteAuthorPic = authorPic && !authorPic.startsWith('http') ? `${siteUrl}${authorPic}` : authorPic;
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+    headline: title,
+    description: plainExcerpt,
+    image: absoluteImage ? [absoluteImage] : undefined,
+    author: authorName
+      ? {
+          '@type': 'Person',
+          name: authorName,
+          ...(authorTitle ? { jobTitle: authorTitle } : {}),
+          ...(absoluteAuthorPic ? { image: absoluteAuthorPic } : {}),
+        }
+      : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: 'Solo Yolo',
+      logo: {
+        '@type': 'ImageObject',
+        url: `${siteUrl}/vercel.svg`,
+      },
+    },
+    datePublished: publishedAt || undefined,
+    dateModified: publishedAt || undefined,
+  };
 
   return (
     <main
@@ -32,6 +87,11 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       }}
     >
       <div className="max-w-3xl mx-auto -mt-24 pb-20">
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd, null, 2) }}
+        />
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 animate-fade-in-up">
           <h1 className="text-4xl font-bold mb-6 text-gray-900">{title}</h1>
           {imageUrl && (
@@ -39,21 +99,28 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
               <Image src={imageUrl} alt={title} width={800} height={400} className="rounded-xl object-cover" />
             </div>
           )}
-          <div className="flex items-center space-x-4 mb-6">
-            {authorPic && (
-              <Image src={authorPic} alt={authorData?.name || ''} width={48} height={48} className="rounded-full" />
-            )}
-            <div>
-              <p className="font-semibold text-gray-800">{authorData?.name}</p>
-              <p className="text-sm text-gray-500">
-                {publishedAt ? new Date(publishedAt).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                }) : ''}
-              </p>
+          {(authorName || authorPic) && (
+            <div className="flex items-center space-x-4 mb-6">
+              {authorPic ? (
+                <Image src={authorPic} alt={authorName || 'Author'} width={48} height={48} className="rounded-full object-cover" />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold">
+                  {authorName ? authorName.charAt(0).toUpperCase() : 'A'}
+                </div>
+              )}
+              <div>
+                {authorName && <p className="font-semibold text-gray-800">{authorName}</p>}
+                {authorTitle && <p className="text-xs text-gray-500 -mt-1 mb-1">{authorTitle}</p>}
+                <p className="text-sm text-gray-500">
+                  {publishedAt ? new Date(publishedAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }) : ''}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
           <article className="prose max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-cyan-700 prose-strong:text-gray-900 prose-blockquote:text-gray-600 prose-code:text-cyan-800 prose-pre:bg-gray-100 prose-pre:text-gray-900 prose-li:text-gray-700 prose-ul:text-gray-700 prose-ol:text-gray-700" dangerouslySetInnerHTML={{ __html: contentHtml }} />
         </div>
       </div>

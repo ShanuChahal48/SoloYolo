@@ -11,6 +11,7 @@ interface BlogCardAttributesShape {
   excerpt: string;
   publishedAt: string;
   cover_image: StrapiMedia | { data: StrapiMedia };
+  author?: any; // normalized below
 }
 
 interface BlogCardProps {
@@ -54,11 +55,20 @@ export default function BlogCard({ post }: BlogCardProps) {
   if (!postData.title || !postData.slug) {
     return null;
   }
-  const { title, excerpt, publishedAt, cover_image } = postData;
+  const { title, excerpt, publishedAt, cover_image, author } = postData as BlogCardAttributesShape;
   const media: StrapiMedia | undefined = (cover_image as { data?: StrapiMedia })?.data ?? (cover_image as StrapiMedia);
   const imageUrl = getImageUrl(media);
   // Check if media is a video (mp4)
   const isVideo = imageUrl.endsWith('.mp4');
+
+  // Normalize author (API returns embedded author object directly under attributes, not wrapped in .data)
+  const authorData = (author as any) || null;
+  const authorName = authorData?.name || '';
+  const authorTitle = authorData?.title || '';
+  const authorPicAttrs = authorData?.picture || authorData?.picture?.data?.attributes || null;
+  const picFormats = authorPicAttrs?.formats || {};
+  const authorPicUrlRel = picFormats?.thumbnail?.url || picFormats?.small?.url || authorPicAttrs?.url || '';
+  const authorPicUrl = authorPicUrlRel ? (authorPicUrlRel.startsWith('http') ? authorPicUrlRel : `${STRAPI_URL}${authorPicUrlRel}`) : '';
 
   return (
     <article className="w-[350px] flex-shrink-0 overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-white group">
@@ -89,6 +99,21 @@ export default function BlogCard({ post }: BlogCardProps) {
         <div className="p-6">
           <h3 className="h-16 text-xl font-bold mb-3 text-gray-900 leading-tight group-hover:text-emerald-600 transition-colors duration-300 drop-shadow-sm">{title}</h3>
           <p className="text-gray-600 mb-4 line-clamp-3 drop-shadow-xs">{excerpt}</p>
+          {(authorName || authorPicUrl) && (
+            <div className="flex items-center mb-4 gap-3">
+              {authorPicUrl ? (
+                <Image src={authorPicUrl} alt={authorName || 'Author'} width={40} height={40} className="rounded-full object-cover shadow" />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-semibold">
+                  {authorName ? authorName.charAt(0).toUpperCase() : 'A'}
+                </div>
+              )}
+              <div className="leading-tight">
+                {authorName && <p className="text-sm font-semibold text-gray-800">{authorName}</p>}
+                {authorTitle && <p className="text-xs text-gray-500">{authorTitle}</p>}
+              </div>
+            </div>
+          )}
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-500">
               {publishedAt ? new Date(publishedAt).toLocaleDateString('en-US', {
