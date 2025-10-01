@@ -101,6 +101,30 @@ export default function BlogPage() {
     }
   };
 
+  // Normalize author from possible Strapi shapes (wrapped or flattened)
+  interface NormalizedAuthor {
+    name?: string;
+    title?: string;
+    picture?: { data?: StrapiMedia } | { data?: { attributes?: { url?: string; formats?: Record<string, { url?: string }> } } } | undefined;
+  }
+
+  const extractAuthor = (raw: unknown): NormalizedAuthor | undefined => {
+    if (!raw || typeof raw !== 'object') return undefined;
+    // Wrapped form: { data: { attributes: { name, title, picture } } }
+    if ('data' in raw) {
+      const wrapped = (raw as { data?: { attributes?: Record<string, unknown> } }).data;
+      const attrs = wrapped?.attributes;
+      if (attrs && (typeof attrs === 'object')) {
+        return attrs as NormalizedAuthor;
+      }
+    }
+    // Flattened form: { name, title, picture }
+    if ('name' in raw || 'title' in raw) {
+      return raw as NormalizedAuthor;
+    }
+    return undefined;
+  };
+
 
 
   return (
@@ -152,16 +176,28 @@ export default function BlogPage() {
                 className="flex overflow-x-auto space-x-8 pb-8 -mx-6 px-6 scrollbar-hide"
               >
                 {posts.map((post: BlogPost) => {
-                  const postData = post.attributes || post;
-                  if (!postData.slug) return null;
+                  const attr = post.attributes;
+                  if (!attr?.slug) return null;
+                  const normalizedAuthor = extractAuthor(attr.author);
+                  const normalized = {
+                    id: post.id,
+                    attributes: {
+                      title: attr.title,
+                      slug: attr.slug,
+                      excerpt: attr.excerpt,
+                      publishedAt: attr.publishedAt,
+                      cover_image: attr.cover_image,
+                      author: normalizedAuthor,
+                    }
+                  };
                   return (
                     <Link
-                      href={`/community/${postData.slug}`}
+                      href={`/community/${attr.slug}`}
                       key={post.id}
                       className="animate-fade-in-up hover-lift"
-                      aria-label={`Open blog post: ${postData.title}`}
+                      aria-label={`Open blog post: ${attr.title}`}
                     >
-                      <BlogCard post={post} />
+                      <BlogCard post={normalized} />
                     </Link>
                   );
                 })}

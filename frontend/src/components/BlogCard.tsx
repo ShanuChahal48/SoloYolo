@@ -5,27 +5,33 @@ import { StrapiMedia } from '@/types'; // Assuming types file exists
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
+interface AuthorPictureFormats { [k: string]: { url?: string } }
+interface AuthorPictureAttributes { url?: string; formats?: AuthorPictureFormats | null }
+interface AuthorPicture { url?: string; formats?: AuthorPictureFormats | null; data?: { attributes?: AuthorPictureAttributes } }
+interface AuthorShape { name?: string; title?: string; picture?: AuthorPicture; data?: { attributes?: AuthorShape } }
+
 interface BlogCardAttributesShape {
   title: string;
   slug: string;
   excerpt: string;
   publishedAt: string;
   cover_image: StrapiMedia | { data: StrapiMedia };
-  author?: any; // normalized below
+  author?: AuthorShape; // normalized below
 }
 
-interface BlogCardProps {
-  post: {
-    id: number;
-    attributes?: BlogCardAttributesShape;
-    // Handle direct format (without attributes wrapper)
-    title?: string;
-    slug?: string;
-    excerpt?: string;
-    publishedAt?: string;
-    cover_image?: StrapiMedia | { data: StrapiMedia };
-  };
-}
+type BlogCardPostShape = {
+  id: number;
+  attributes?: BlogCardAttributesShape; // standard Strapi
+  // flattened fallback
+  title?: string;
+  slug?: string;
+  excerpt?: string;
+  publishedAt?: string;
+  cover_image?: StrapiMedia | { data: StrapiMedia };
+  author?: AuthorShape;
+};
+
+interface BlogCardProps { post: BlogCardPostShape }
 
 const getImageUrl = (
   media: StrapiMedia | undefined,
@@ -62,7 +68,7 @@ export default function BlogCard({ post }: BlogCardProps) {
   const isVideo = imageUrl.endsWith('.mp4');
 
   // Normalize author (API returns embedded author object directly under attributes, not wrapped in .data)
-  const authorData = (author as any) || null;
+  const authorData: AuthorShape | null = author?.data?.attributes || author || null;
   const authorName = authorData?.name || '';
   const authorTitle = authorData?.title || '';
   const authorPicAttrs = authorData?.picture || authorData?.picture?.data?.attributes || null;

@@ -27,13 +27,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     notFound();
   }
 
-  const postData = (post as { attributes?: import('@/types').BlogPostAttributes }).attributes ?? post;
-    const { title, content, publishedAt, cover_image, author } = postData as import('@/types').BlogPostAttributes;
-    const media = (cover_image?.data ?? cover_image) as import('@/types').StrapiMedia;
-    const contentHtml = marked.parse(content);
+  interface MediaFormats { [k: string]: { url?: string } }
+  interface MediaAttributes { url?: string; formats?: MediaFormats; alternativeText?: string }
+  interface MediaLike { url?: string; formats?: MediaFormats; attributes?: MediaAttributes; data?: { attributes?: MediaAttributes } }
+  interface AuthorPicture { url?: string; formats?: MediaFormats; attributes?: MediaAttributes; data?: { attributes?: MediaAttributes } }
+  interface AuthorLike { name?: string; title?: string; picture?: AuthorPicture; data?: { attributes?: AuthorLike } }
+  interface PostShape { title?: string; content?: string; cover_image?: MediaLike; author?: AuthorLike; publishedAt?: string; attributes?: PostShape }
+  const rawPost: PostShape = post as PostShape;
+  const postData: PostShape = rawPost.attributes ? rawPost.attributes : rawPost;
+    const { title, content, publishedAt, cover_image, author } = postData;
+  const media: MediaLike | MediaAttributes | null = (cover_image as MediaLike)?.data?.attributes || (cover_image as MediaLike)?.attributes || (cover_image as MediaLike) || null;
+  const safeContent = content || '';
+  const contentHtml = marked.parse(safeContent);
 
     // --- Author Normalization (supports flattened or nested) ---
-    const authorNode: any = (author as any)?.data?.attributes || author || null;
+  const authorNode: AuthorLike | null = author?.data?.attributes || author || null;
     const authorAttributes = authorNode || undefined;
     const pictureAttrs = authorNode?.picture?.data?.attributes || authorNode?.picture?.attributes || authorNode?.picture || null;
     const picFormats = pictureAttrs?.formats || {};
@@ -53,7 +61,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, 220);
-    const coverMedia = media?.attributes || (media as any) || null;
+  const coverMedia: MediaAttributes | null = (media as MediaLike)?.attributes || (media as MediaAttributes) || null;
     const coverFormats = coverMedia?.formats || {};
     const coverUrlRel = coverFormats?.large?.url || coverFormats?.medium?.url || coverFormats?.small?.url || coverMedia?.url || '';
     const absoluteImage = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI_URL}${coverUrlRel}`) : '';
@@ -94,6 +102,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         backgroundPosition: 'center',
       }}
     >
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd, null, 2) }} />
       {/* Hero Section with Parallax Effect */}
       <div className="relative h-[60vh] w-full overflow-hidden">
         {(() => {
@@ -119,7 +128,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           return (
             <Image
               src={url}
-              alt={media?.alternativeText || media?.attributes?.alternativeText || `Cover for ${title}`}
+              alt={coverMedia?.alternativeText || `Cover for ${title}`}
               fill
               sizes="100vw"
               style={{ objectFit: 'cover' }}
@@ -153,13 +162,15 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                   {authorAttributes?.title && (
                     <p className="text-xs text-teal-300/90 mb-1">{authorAttributes.title}</p>
                   )}
-                <p className="text-sm text-teal-200">
-                  {new Date(publishedAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
+                {publishedAt && (
+                  <p className="text-sm text-teal-200">
+                    {new Date(publishedAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </p>
+                )}
               </div>
             </div>
           </div>

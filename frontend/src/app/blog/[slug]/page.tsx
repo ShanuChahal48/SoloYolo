@@ -8,18 +8,25 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
   if (!post) return notFound();
 
   // Support both Strapi shapes: legacy (attributes wrapper) & flattened
-  const postData: any = (post as any).attributes ? (post as any).attributes : post;
+  interface MediaFormats { [k: string]: { url?: string } }
+  interface MediaAttributes { url?: string; formats?: MediaFormats }
+  interface MediaLike { url?: string; formats?: MediaFormats; attributes?: MediaAttributes; data?: { attributes?: MediaAttributes } }
+  interface AuthorPicture { url?: string; formats?: MediaFormats; attributes?: MediaAttributes; data?: { attributes?: MediaAttributes } }
+  interface AuthorLike { name?: string; title?: string; picture?: AuthorPicture; data?: { attributes?: AuthorLike } }
+  interface PostShape { title?: string; content?: string; cover_image?: MediaLike; author?: AuthorLike; publishedAt?: string; attributes?: PostShape }
+  const rawPost: PostShape = post as PostShape;
+  const postData: PostShape = rawPost.attributes ? rawPost.attributes : rawPost;
   const { title, content, cover_image, author, publishedAt } = postData;
   const STRAPI = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
   // Cover image (handle either cover_image.data.attributes.url or direct url/formats)
-  const coverMedia = cover_image?.data?.attributes || cover_image?.attributes || cover_image || null;
+  const coverMedia: MediaAttributes | null = cover_image?.data?.attributes || cover_image?.attributes || cover_image || null;
   const coverFormats = coverMedia?.formats || {};
   const coverUrlRel = coverFormats?.large?.url || coverFormats?.medium?.url || coverFormats?.small?.url || coverMedia?.url || '';
-  const imageUrl = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI}${coverUrlRel}`) : '';
+  const imageUrl: string = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI}${coverUrlRel}`) : '';
 
   // Author normalization (direct object OR relation object with data)
-  const authorNode: any = (author as any)?.data?.attributes || author || null;
+  const authorNode: AuthorLike | null = author?.data?.attributes || author || null;
   const pictureAttrs = authorNode?.picture?.data?.attributes || authorNode?.picture?.attributes || authorNode?.picture || null;
   const picFormats = pictureAttrs?.formats || {};
   const chosenPic = picFormats?.thumbnail?.url || picFormats?.small?.url || pictureAttrs?.url || '';
@@ -87,16 +94,12 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       }}
     >
       <div className="max-w-3xl mx-auto -mt-24 pb-20">
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd, null, 2) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd, null, 2) }} />
         <div className="bg-white rounded-2xl shadow-2xl p-8 md:p-12 animate-fade-in-up">
           <h1 className="text-4xl font-bold mb-6 text-gray-900">{title}</h1>
           {imageUrl && (
             <div className="mb-8">
-              <Image src={imageUrl} alt={title} width={800} height={400} className="rounded-xl object-cover" />
+              <Image src={imageUrl} alt={title || 'Blog cover'} width={800} height={400} className="rounded-xl object-cover" />
             </div>
           )}
           {(authorName || authorPic) && (
