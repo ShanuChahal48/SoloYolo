@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 
 const whatsappNumber = '9606081341';
-const whatsappLink = `https://wa.me/${whatsappNumber}`;
+const prefilledMessage = encodeURIComponent('Hello. How can I help you!');
+const whatsappLink = `https://wa.me/${whatsappNumber}?text=${prefilledMessage}`;
 
 export default function WhatsAppChatButton() {
   const [open, setOpen] = useState(false);
