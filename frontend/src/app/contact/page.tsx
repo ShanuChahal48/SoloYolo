@@ -26,28 +26,17 @@ export default async function ContactPage() {
     }}
   >
             {/* Hero Section with Animation */}
-                                    <section
-                                        className="relative text-white py-24 text-center overflow-hidden"
-                                        style={{
-                                            backgroundColor: '#0f172a',
-                                            backgroundImage: `linear-gradient(120deg, rgba(34,211,238,0.18) 0%, rgba(59,130,246,0.18) 100%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
-                                            backgroundRepeat: 'repeat',
-                                            backgroundSize: '100px 100px',
-                                            backgroundAttachment: 'fixed',
-                                            backgroundPosition: 'center',
-                                        }}
-                                    >
-                                        {/* Floating Elements for blueish effect */}
-                                        <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float z-10"></div>
-                                        <div className="absolute top-40 right-20 w-16 h-16 bg-cyan-400/20 rounded-full animate-float z-10" style={{animationDelay: '1s'}}></div>
-                                        <div className="absolute bottom-40 left-20 w-12 h-12 bg-blue-400/20 rounded-full animate-float z-10" style={{animationDelay: '2s'}}></div>
-                {/* Background Elements */}
-                <div className="absolute top-0 left-0 w-full h-full">
-                    <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full animate-float"></div>
-                    <div className="absolute top-40 right-20 w-24 h-24 bg-amber-400/20 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
-                    <div className="absolute bottom-20 left-20 w-16 h-16 bg-teal-400/20 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
-                </div>
-                
+            <section
+                className="relative text-white py-24 text-center overflow-hidden"
+                style={{
+                    backgroundColor: '#0f172a',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
+                    backgroundRepeat: 'repeat',
+                    backgroundSize: '100px 100px',
+                    backgroundAttachment: 'fixed',
+                    backgroundPosition: 'center',
+                }}
+            >
                 <div className="relative z-10 container mx-auto px-6">
                     <div className="animate-fade-in-up">
                         <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">{attributes.headline || 'Contact Us'}</h1>

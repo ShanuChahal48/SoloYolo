@@ -96,14 +96,17 @@ export default async function HomePage() {
 
       {/* --- Testimonials Section --- */}
       {featuredTestimonials.length > 0 && (
-  <section className="relative bg-transparent py-24 overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 left-0 w-full h-full" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-            }}></div>
-          </div>
-          
+        <section
+          className="relative py-24 overflow-hidden"
+          style={{
+            backgroundColor: '#0f172a',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '100px 100px',
+            backgroundAttachment: 'fixed',
+            backgroundPosition: 'center',
+          }}
+        >
           <div className="relative z-10 container mx-auto px-6 text-center">
             <div className="animate-fade-in-up">
               <h2 className="text-responsive-2xl font-serif font-bold text-slate-100 mb-6">
@@ -113,13 +116,12 @@ export default async function HomePage() {
                 Real stories from adventurers who have journeyed with us.
               </p>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {featuredTestimonials.map((testimonial, index) => (
-                <div 
-                  key={testimonial.id} 
+                <div
+                  key={testimonial.id}
                   className="animate-fade-in-up hover-lift"
-                  style={{animationDelay: `${index * 0.2}s`}}
+                  style={{ animationDelay: `${index * 0.2}s` }}
                 >
                   <TestimonialCard testimonial={testimonial} />
                 </div>
