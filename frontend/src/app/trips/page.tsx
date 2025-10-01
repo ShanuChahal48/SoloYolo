@@ -32,40 +32,71 @@ export default async function TripsPage() {
         backgroundPosition: 'center, center',
       }}
     >
-      {/* Header Image with Overlayed Title and Description */}
-      <div className="relative w-full bg-black">
-        <div className="w-full h-[220px] sm:h-[320px] md:h-[400px] lg:h-[480px] xl:h-[560px] 2xl:h-[640px] relative flex items-center justify-center">
-          <Image
-            src="/desktop.adapt.1920.high.webp"
-            alt="Trips Header"
-            fill
-            style={{ objectFit: 'cover', zIndex: 1 }}
-            className="absolute inset-0 w-full h-full"
-            sizes="100vw"
-          />
-          {/* Overlay with title and description inside the image */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2 sm:px-4 pt-20 sm:pt-24 md:pt-28 lg:pt-32" style={{ zIndex: 2 }}>
-            <div className="w-full max-w-lg sm:max-w-xl md:max-w-2xl p-3 sm:p-6 md:p-10 mx-auto">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-3 sm:mb-5 text-white">All Our Expeditions</h1>
-              <p className="text-xs sm:text-base md:text-lg text-teal-100 max-w-2xl mx-auto leading-relaxed">
-                Discover extraordinary journeys that will take you beyond the beaten path.<br />
-                Each adventure is carefully crafted to create unforgettable memories.
-              </p>
+      {/* Header Image with refined (brighter) contrast overlay */}
+      {/* Hero matching homepage height */}
+      <div className="relative w-full h-screen overflow-hidden">
+        <Image
+          src="/carvan.jpg"
+          alt="Caravan road trip"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center select-none"
+        />
+        {/* Soft gradient for legibility without dulling image */}
+        <div className="absolute inset-0" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.65) 100%)'}} aria-hidden="true" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]">
+              All Our Expeditions
+            </h1>
+            <p className="mx-auto max-w-3xl text-sm sm:text-lg md:text-xl font-medium leading-relaxed text-white/95 drop-shadow-[0_3px_8px_rgba(0,0,0,0.75)]">
+              Discover extraordinary journeys that will take you beyond the beaten path. Each adventure is carefully crafted to create unforgettable memories.
+            </p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-4">
+              <span className="inline-block rounded-full bg-black/40 px-5 py-2 text-xs sm:text-sm md:text-base text-white font-semibold backdrop-blur-[2px] ring-1 ring-white/25">
+                Curated • Immersive • Unforgettable
+              </span>
             </div>
           </div>
+        </div>
+
+        {/* Mountain divider like homepage */}
+        <div className="absolute left-0 right-0 bottom-0 w-full overflow-visible pointer-events-none" style={{lineHeight:0}}>
+          <Image
+            src="/mountain-divider.svg"
+            alt="Section divider"
+            width={1920}
+            height={200}
+            className="w-full h-auto block"
+            priority
+          />
         </div>
       </div>
       
       {/* Gap between header image and waterfall1 section */}
   <div className="w-full" style={{ height: '40px' }}></div>
 
-      {/* First three trip cards above waterfall1.jpg, no mask */}
+      {/* Featured (Events & Trip) section on top of waterfall image */}
       <div className="relative w-full pb-12">
-        {/* Blue overlay for visual consistency with homepage */}
-        <div className="absolute inset-0 z-0" style={{background: 'linear-gradient(180deg, rgba(30,64,175,0.18) 0%, rgba(15,23,42,0.85) 100%)'}}></div>
-        <div className="relative z-10">
+        {/* Background image */}
+        <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+          <Image
+            src="/waterfall1.jpg"
+            alt="Waterfall scenic backdrop"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center scale-105 brightness-[0.85]"
+          />
+        </div>
+        {/* Gradient overlay for readability */}
+        <div className="absolute inset-0 z-10" style={{background: 'linear-gradient(180deg, rgba(15,23,42,0.55) 0%, rgba(15,23,42,0.85) 100%)'}} />
+        <div className="relative z-20">
   <div className="container mx-auto px-2 sm:px-4 pt-16 sm:pt-24 md:pt-32">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-8 sm:mb-12 tracking-wide drop-shadow-lg text-center" style={{textShadow: '0 2px 8px rgba(0,0,0,0.5)'}}>Events &amp; Trip</h2>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-8 sm:mb-12 tracking-wide drop-shadow-lg text-center">
+            Events &amp; Trip
+          </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {trips.filter(trip => trip.is_featured).map((trip, index) => (
               <div 

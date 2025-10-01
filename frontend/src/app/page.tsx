@@ -98,6 +98,19 @@ export default async function HomePage() {
       <section className="pt-0 relative">
         <div className="relative z-10">
           <FeaturedTrips />
+          {/* Explore more trips link */}
+          <div className="mt-10 flex justify-center">
+            <Link
+              href="/trips"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-semibold shadow-lg hover:from-teal-500 hover:to-cyan-500 transition-colors duration-300 hover-lift focus:outline-none focus:ring-4 focus:ring-teal-500/40"
+              aria-label="Explore more trips"
+            >
+              Explore more trips
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </section>
 
