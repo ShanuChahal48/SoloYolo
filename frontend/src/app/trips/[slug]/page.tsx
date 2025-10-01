@@ -8,10 +8,11 @@ import Image from 'next/image';
 import BookingButton from '@/components/BookingButton';
 import { resolveServerSideBookingLink } from '@/lib/logoutWorld';
 import { getMediaUrl, getMediaAlt, extractMediaAttributes, StrapiMedia } from '@/lib/media';
+import TripGalleryLightboxClient from '@/components/TripGalleryLightboxClient';
 import React from 'react';
 
 
-// STRAPI_URL removed (media helpers construct absolute URLs)
+const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
 // Removed unused getStrapiImageUrl helper (replaced by getMediaUrl)
 
@@ -40,9 +41,8 @@ function hasAttributes(entity: TripEntity | null | undefined): entity is { id: n
 
 // Media helpers now imported from '@/lib/media'
 
-// NOTE: Using Promise-wrapped params to align with current inferred PageProps constraint
-export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function TripDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const trip = await getTripBySlug(slug);
 
   if (!trip) {
@@ -215,7 +215,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
           </aside>
         </div>
 
-        {/* Gallery Section */}
+        {/* Gallery Section with Lightbox */}
         {gallery && Array.isArray(gallery) && gallery.length > 0 && (
           <div className="mt-20">
             <div className="text-center mb-12 animate-fade-in-up">
@@ -224,37 +224,11 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
                 Explore the beautiful moments and stunning locations from this amazing journey.
               </p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {gallery.map((img: StrapiMedia, index) => {
-                const imageUrl = getMediaUrl(img);
-                const attrs = extractMediaAttributes(img);
-                return (
-                  <div 
-                    key={attrs?.url ? `${attrs.url}-${index}` : index} 
-                    className="relative aspect-square rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover-lift animate-fade-in-up group"
-                    style={{animationDelay: `${index * 0.1}s`}}
-                  >
-                    {imageUrl ? (
-                      <Image
-                        src={imageUrl}
-                        alt={attrs?.alternativeText || 'Trip gallery image'}
-                        fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                        style={{ objectFit: 'cover' }}
-                        className="group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500">
-                        <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                        </svg>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                );
-              })}
-            </div>
+            <TripGalleryLightboxClient
+              images={gallery as StrapiMedia[]}
+              gridClassName="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+              thumbClassName="animate-fade-in-up"
+            />
           </div>
         )}
       </div>
