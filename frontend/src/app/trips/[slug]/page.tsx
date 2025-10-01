@@ -55,7 +55,17 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     : [];
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-teal-50 min-h-screen">
+    <main
+      className="overflow-hidden relative min-h-screen"
+      style={{
+        backgroundColor: '#0f172a',
+        backgroundImage: `url('/galaxy.svg'), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
+        backgroundRepeat: 'repeat, repeat',
+        backgroundSize: 'cover, 100px 100px',
+        backgroundAttachment: 'fixed, fixed',
+        backgroundPosition: 'center, center',
+      }}
+    >
       {/* Hero Section with Featured Image */}
       <div className="relative h-[70vh] w-full overflow-hidden">
         {getStrapiImageUrl(featured_image) ? (
@@ -105,10 +115,21 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
           
           {/* Main Content: Itinerary */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 animate-fade-in-up">
-              <h2 className="text-4xl font-bold text-gray-800 mb-8">Trip Itinerary</h2>
+            <div
+              className="rounded-2xl shadow-xl p-8 md:p-12 animate-fade-in-up"
+              style={{
+                background: 'linear-gradient(180deg, rgba(30,64,175,0.18) 0%, rgba(15,23,42,0.85) 100%)',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'repeat',
+                backgroundSize: '100px 100px',
+                backgroundAttachment: 'fixed',
+                backgroundPosition: 'center',
+                color: '#f1f5f9',
+              }}
+            >
+              <h2 className="text-4xl font-bold text-slate-100 mb-8">Trip Itinerary</h2>
               {/* Render the HTML from markdown */}
-              <article className="prose lg:prose-xl max-w-none prose-headings:text-gray-900 prose-p:text-gray-700 prose-a:text-teal-600 prose-strong:text-gray-900">
+              <article className="prose lg:prose-xl max-w-none prose-headings:text-slate-100 prose-p:text-slate-200 prose-a:text-cyan-400 prose-strong:text-white prose-blockquote:text-slate-300 prose-code:text-cyan-300 prose-pre:bg-slate-900">
                 {itineraryBlocks.map((block, idx) => {
                   if (block.type === 'paragraph' && block.children) {
                     const text = block.children.map((child) => child.text).join(' ');
@@ -218,6 +239,6 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
           </div>
         )}
       </div>
-    </div>
+  </main>
   );
 }

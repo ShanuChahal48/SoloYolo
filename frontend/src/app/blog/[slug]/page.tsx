@@ -30,8 +30,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           <Image src={authorPic} alt={authorData?.name || ''} width={48} height={48} className="rounded-full" />
         )}
         <div>
-          <p className="font-semibold text-gray-800">{authorData?.name}</p>
-          <p className="text-sm text-gray-500">
+          <p className="font-semibold text-slate-100">{authorData?.name}</p>
+          <p className="text-sm text-slate-400">
             {publishedAt ? new Date(publishedAt).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
@@ -40,7 +40,7 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
           </p>
         </div>
       </div>
-      <article className="prose max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-a:text-teal-600" dangerouslySetInnerHTML={{ __html: contentHtml }} />
+  <article className="prose max-w-none prose-headings:text-slate-100 prose-p:text-slate-200 prose-a:text-cyan-400 prose-strong:text-white prose-blockquote:text-slate-300 prose-code:text-cyan-300 prose-pre:bg-slate-900" dangerouslySetInnerHTML={{ __html: contentHtml }} />
     </main>
   );
 }

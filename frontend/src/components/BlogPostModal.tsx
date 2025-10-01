@@ -84,7 +84,16 @@ export default function BlogPostModal(props: BlogPostModalProps) {
       onClick={onClose}
     >
       <div
-        className="relative flex flex-row w-full max-w-4xl h-[80vh] bg-white rounded-2xl shadow-2xl overflow-hidden"
+        className="relative flex flex-row w-full max-w-4xl h-[80vh] rounded-2xl shadow-2xl overflow-hidden"
+        style={{
+          backgroundColor: '#0f172a',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '100px 100px',
+          backgroundAttachment: 'fixed',
+          backgroundPosition: 'center',
+          color: '#f1f5f9',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left Arrow */}
@@ -140,7 +149,7 @@ export default function BlogPostModal(props: BlogPostModalProps) {
             </span>
           </div>
           <article
-            className="prose max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-a:text-teal-600"
+            className="prose max-w-none prose-headings:text-slate-100 prose-p:text-slate-200 prose-a:text-cyan-400 prose-strong:text-white prose-blockquote:text-slate-300 prose-code:text-cyan-300 prose-pre:bg-slate-900"
             dangerouslySetInnerHTML={{ __html: contentHtml }}
           />
         </div>
