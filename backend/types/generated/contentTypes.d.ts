@@ -614,6 +614,9 @@ export interface ApiTripTrip extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
+    booking_url: Schema.Attribute.String & Schema.Attribute.Configurable;
+    booking_url_verified: Schema.Attribute.Boolean &
+      Schema.Attribute.DefaultTo<false>;
     category: Schema.Attribute.Enumeration<['India', 'International']>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

@@ -64,6 +64,15 @@
     "is_featured": {
       "type": "boolean",
       "default": false
+    },
+    "booking_url": {
+      "type": "string",
+      "required": false,
+      "configurable": true
+    },
+    "booking_url_verified": {
+      "type": "boolean",
+      "default": false
     }
   }
 }

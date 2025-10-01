@@ -4,6 +4,11 @@ import { getTripBySlug } from '@/lib/api';
 import { } from '@/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
+import BookingButton from '@/components/BookingButton';
+import { resolveServerSideBookingLink } from '@/lib/logoutWorld';
+import React from 'react';
+
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
@@ -44,7 +49,20 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     notFound();
   }
 
-  const { title, price, duration, category, itinerary, featured_image, gallery } = trip;
+  const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug } = trip as typeof trip & { slug?: string };
+
+  // If Strapi provides a confirmed booking_url, prefer it and skip guessing.
+  // The trip object shape from Strapi: { attributes: { ...fields } } or flattened (depending on earlier usage)
+  // Current code seems to return data[0] (which likely has 'attributes'), so attempt both.
+  // @ts-ignore - be defensive
+  const rawAttributes = (trip.attributes ? trip.attributes : trip) as any;
+  const confirmedBookingUrl: string | undefined = rawAttributes.booking_url || undefined;
+  const confirmedVerified: boolean = !!rawAttributes.booking_url_verified;
+
+  // Server-side booking link resolution (HEAD validates & may fallback) for SEO and structured data.
+  const bookingLink = confirmedBookingUrl && confirmedVerified
+    ? { primary: confirmedBookingUrl, fallback: confirmedBookingUrl, usingFallback: false, validated: true }
+    : await resolveServerSideBookingLink({ title, internalSlug: internalTripSlug });
 
   // Render itinerary blocks as paragraphs
   type RichTextBlock = { type: 'paragraph'; children?: { text: string }[] };
@@ -186,9 +204,8 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
               </div>
               
               <div className="space-y-4">
-                <button className="w-full bg-gradient-to-r from-teal-600 to-teal-700 text-white font-bold py-4 px-6 rounded-xl text-lg hover:from-teal-700 hover:to-teal-800 transition-all duration-300 hover-lift">
-                  Book Now
-                </button>
+                {/* Pass through original title/slug for client analytic event; server prevalidated link used for SEO in JSON-LD */}
+                <BookingButton title={title} internalSlug={internalTripSlug} directUrl={confirmedBookingUrl} />
                 <button className="w-full bg-gray-100 text-gray-800 font-bold py-4 px-6 rounded-xl text-lg hover:bg-gray-200 transition-all duration-300 hover-lift">
                   Enquire
                 </button>
@@ -239,6 +256,31 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
           </div>
         )}
       </div>
+      {/* JSON-LD Structured Data for Trip / Offer including external booking URL */}
+      <script
+        type="application/ld+json"
+        // We intentionally keep this minimal; can be extended with geo, organizer, etc.
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Trip',
+            name: title,
+            description: `${title} – ${category || 'Travel Experience'}`,
+            offers: {
+              '@type': 'Offer',
+              price: typeof price === 'number' ? price : undefined,
+              priceCurrency: 'INR',
+              availability: 'https://schema.org/InStock',
+              url: bookingLink.primary,
+            },
+            provider: {
+              '@type': 'Organization',
+              name: 'Solo Yolo',
+              url: 'https://logout.world/tours/hosts/solo-yolo/'
+            }
+          })
+        }}
+      />
   </main>
   );
 }
