@@ -201,8 +201,8 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
         {gallery && Array.isArray(gallery) && gallery.length > 0 && (
           <div className="mt-20">
             <div className="text-center mb-12 animate-fade-in-up">
-              <h2 className="text-4xl font-bold text-gray-800 mb-4">Trip Gallery</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              <h2 className="text-4xl font-bold text-slate-100 mb-4 drop-shadow">Trip Gallery</h2>
+              <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
                 Explore the beautiful moments and stunning locations from this amazing journey.
               </p>
             </div>

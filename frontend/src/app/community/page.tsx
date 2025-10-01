@@ -206,30 +206,49 @@ export default function BlogPage() {
 
       {/* Testimonials Section */}
       {testimonials.length > 0 && (
-        <section className="relative bg-gradient-to-br from-teal-50 to-amber-50 py-24 overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-0 left-0 w-full h-full" style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-            }}></div>
+        <section
+          className="relative py-24 overflow-hidden"
+          style={{
+            backgroundColor: '#0f172a',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Ccircle cx='10' cy='15' r='1' fill='%23f1f5f9' opacity='0.25'/%3E%3Ccircle cx='60' cy='40' r='1.2' fill='%23f1f5f9' opacity='0.18'/%3E%3Ccircle cx='85' cy='20' r='0.9' fill='%23f1f5f9' opacity='0.32'/%3E%3Ccircle cx='30' cy='80' r='1.1' fill='%23f1f5f9' opacity='0.22'/%3E%3Ccircle cx='95' cy='92' r='0.7' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='5' cy='55' r='0.9' fill='%23f1f5f9' opacity='0.18'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.4' opacity='0.07' d='M0 60 C25 35, 75 85, 100 60'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 30, 25 70, 50 100'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'repeat',
+            backgroundSize: '100px 100px',
+            backgroundAttachment: 'fixed',
+            backgroundPosition: 'center'
+          }}
+        >
+          {/* Soft radial glow overlays */}
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -top-32 -left-32 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl" />
+            <div className="absolute top-1/2 -right-40 w-[32rem] h-[32rem] bg-amber-400/10 rounded-full blur-3xl" />
           </div>
-          
+
           <div className="relative z-10 container mx-auto px-6">
             <div className="text-center mb-16 animate-fade-in-up">
-              <h2 className="text-4xl font-bold text-gray-800 mb-6">What Our Travelers Say</h2>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              <h2 className="text-4xl font-bold text-slate-100 mb-6 drop-shadow">What Our Travelers Say</h2>
+              <p className="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
                 Real experiences and heartfelt stories from adventurers who have journeyed with us.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {testimonials.map((testimonial, index) => (
-                <div 
-                  key={testimonial.id} 
+                <div
+                  key={testimonial.id}
                   className="animate-fade-in-up hover-lift"
-                  style={{animationDelay: `${index * 0.15}s`}}
+                  style={{ animationDelay: `${index * 0.15}s` }}
                 >
-                  <TestimonialCard testimonial={testimonial as unknown as { attributes: { traveler_name: string; trip_taken: string; quote: string; rating: number; picture: { data: StrapiMedia } } }} />
+                  <TestimonialCard
+                    testimonial={testimonial as unknown as {
+                      attributes: {
+                        traveler_name: string;
+                        trip_taken: string;
+                        quote: string;
+                        rating: number;
+                        picture: { data: StrapiMedia };
+                      };
+                    }}
+                  />
                 </div>
               ))}
             </div>
