@@ -114,7 +114,62 @@ export async function getBlogPosts() {
         sort: ['publishedAt:desc'],
     } as const;
     const res = await fetchApi('/blog-posts', query);
-    return res?.data || [];
+    const items = res?.data || [];
+    // Normalize flattened shape (production) to Strapi default attributes shape expected by UI
+    interface RawMedia { id?: number; formats?: unknown; url?: string; [k: string]: unknown }
+    interface RawAuthor { name?: string; title?: string; picture?: RawMedia; [k: string]: unknown }
+    interface RawFlatBlogItem {
+        id?: number;
+        title?: string;
+        slug?: string;
+        excerpt?: string;
+        content?: string;
+        publishedAt?: string;
+        createdAt?: string;
+        cover_image?: RawMedia;
+        author?: RawAuthor;
+        attributes?: unknown; // presence means already normalized
+        [k: string]: unknown;
+    }
+    const normalized = items.map((item: unknown) => {
+        const flat = item as RawFlatBlogItem;
+        if (flat && (flat as { attributes?: unknown }).attributes) return flat as unknown; // already standard
+        if (!flat || typeof flat !== 'object') return flat;
+        const {
+            id,
+            title = '',
+            slug = '',
+            excerpt = '',
+            content = '',
+            publishedAt,
+            createdAt,
+            cover_image,
+            author,
+        } = flat;
+        const wrappedCover = cover_image ? { data: cover_image } : { data: undefined };
+        const wrappedAuthor = author ? {
+            data: {
+                attributes: {
+                    name: author.name,
+                    title: author.title,
+                    picture: author.picture ? { data: author.picture } : undefined,
+                }
+            }
+        } : undefined;
+        return {
+            id,
+            attributes: {
+                title,
+                slug,
+                excerpt,
+                content,
+                publishedAt: publishedAt || createdAt || new Date().toISOString(),
+                cover_image: wrappedCover,
+                author: wrappedAuthor,
+            }
+        };
+    });
+    return normalized;
 }
 
 /**
@@ -131,7 +186,55 @@ export async function getPostBySlug(slug: string) {
         },
     } as const;
     const res = await fetchApi('/blog-posts', query);
-    return res?.data?.[0] || null;
+    const raw = res?.data?.[0];
+    if (!raw) return null;
+    if (raw.attributes) return raw; // already normalized
+    interface RawMedia { id?: number; formats?: unknown; url?: string; [k: string]: unknown }
+    interface RawAuthor { name?: string; title?: string; picture?: RawMedia; [k: string]: unknown }
+    interface RawFlatBlogItemSingle {
+        id?: number;
+        title?: string;
+        slug?: string;
+        excerpt?: string;
+        content?: string;
+        publishedAt?: string;
+        createdAt?: string;
+        cover_image?: RawMedia;
+        author?: RawAuthor;
+        attributes?: unknown;
+        [k: string]: unknown;
+    }
+    const {
+        id,
+        title = '',
+        slug: s = '',
+        excerpt = '',
+        content = '',
+        publishedAt,
+        createdAt,
+        cover_image,
+        author,
+    } = raw as RawFlatBlogItemSingle;
+    return {
+        id,
+        attributes: {
+            title,
+            slug: s,
+            excerpt,
+            content,
+            publishedAt: publishedAt || createdAt || new Date().toISOString(),
+            cover_image: cover_image ? { data: cover_image } : { data: undefined },
+            author: author ? {
+                data: {
+                    attributes: {
+                        name: author.name,
+                        title: author.title,
+                        picture: author.picture ? { data: author.picture } : undefined,
+                    }
+                }
+            } : undefined,
+        }
+    };
 }
 
 /**

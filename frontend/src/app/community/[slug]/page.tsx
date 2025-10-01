@@ -19,8 +19,9 @@ const getImageUrl = (
   return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
-export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  // Ensure slug is a string (defensive against unexpected runtime shapes)
+  const slug = typeof params.slug === 'string' ? params.slug : Array.isArray(params.slug) ? params.slug[0] : '';
   const post = await getPostBySlug(slug);
 
   if (!post) {
@@ -35,18 +36,34 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   interface PostShape { title?: string; content?: string; cover_image?: MediaLike; author?: AuthorLike; publishedAt?: string; attributes?: PostShape }
   const rawPost: PostShape = post as PostShape;
   const postData: PostShape = rawPost.attributes ? rawPost.attributes : rawPost;
-    const { title, content, publishedAt, cover_image, author } = postData;
-  const media: MediaLike | MediaAttributes | null = (cover_image as MediaLike)?.data?.attributes || (cover_image as MediaLike)?.attributes || (cover_image as MediaLike) || null;
+  const { title, content, publishedAt, cover_image, author } = postData;
+
+  // --- Unified media unwrapping helper ---
+  const unwrapMedia = (m: unknown): MediaAttributes | null => {
+    if (!m || typeof m !== 'object') return null;
+    const obj = m as Record<string, unknown>;
+    if ('attributes' in obj && obj.attributes) return unwrapMedia(obj.attributes);
+    if ('data' in obj && obj.data) return unwrapMedia(obj.data);
+    // If it has url or formats, treat as media leaf
+    if ('url' in obj || 'formats' in obj) return obj as MediaAttributes;
+    return null;
+  };
+
+  // Cover media can appear as { data: RawMedia } or { data: { attributes: RawMedia } }
+  const media: MediaAttributes | null = unwrapMedia(cover_image);
   const safeContent = content || '';
   const contentHtml = marked.parse(safeContent);
 
     // --- Author Normalization (supports flattened or nested) ---
-  const authorNode: AuthorLike | null = author?.data?.attributes || author || null;
-    const authorAttributes = authorNode || undefined;
-    const pictureAttrs = authorNode?.picture?.data?.attributes || authorNode?.picture?.attributes || authorNode?.picture || null;
-    const picFormats = pictureAttrs?.formats || {};
-    const picRel = picFormats?.thumbnail?.url || picFormats?.small?.url || pictureAttrs?.url || '';
-    const authorImageUrl = picRel ? (picRel.startsWith('http') ? picRel : `${STRAPI_URL}${picRel}`) : '';
+  const authorNode: AuthorLike | null = (author?.data?.attributes as AuthorLike) || (author as AuthorLike) || null;
+  const authorAttributes = authorNode || undefined;
+  const authorPicRaw = unwrapMedia(authorNode?.picture);
+  const picFormats = authorPicRaw?.formats || {};
+  const picRel = picFormats?.thumbnail?.url
+    || picFormats?.small?.url
+    || authorPicRaw?.url
+    || '';
+  const authorImageUrl = picRel ? (picRel.startsWith('http') ? picRel : `${STRAPI_URL}${picRel}`) : '';
 
     // --- Article JSON-LD ---
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -61,10 +78,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       .replace(/\s+/g, ' ')
       .trim()
       .slice(0, 220);
-  const coverMedia: MediaAttributes | null = (media as MediaLike)?.attributes || (media as MediaAttributes) || null;
-    const coverFormats = coverMedia?.formats || {};
-    const coverUrlRel = coverFormats?.large?.url || coverFormats?.medium?.url || coverFormats?.small?.url || coverMedia?.url || '';
-    const absoluteImage = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI_URL}${coverUrlRel}`) : '';
+  const coverFormats = media?.formats || {};
+  const coverUrlRel = coverFormats?.large?.url
+    || coverFormats?.medium?.url
+    || coverFormats?.small?.url
+    || media?.url
+    || '';
+  const absoluteImage = coverUrlRel ? (coverUrlRel.startsWith('http') ? coverUrlRel : `${STRAPI_URL}${coverUrlRel}`) : '';
     const absoluteAuthorPic = authorImageUrl && !authorImageUrl.startsWith('http') ? `${siteUrl}${authorImageUrl}` : authorImageUrl;
     const articleJsonLd = {
       '@context': 'https://schema.org',
@@ -128,7 +148,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           return (
             <Image
               src={url}
-              alt={coverMedia?.alternativeText || `Cover for ${title}`}
+              alt={media?.alternativeText || `Cover for ${title}`}
               fill
               sizes="100vw"
               style={{ objectFit: 'cover' }}
