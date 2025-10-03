@@ -1,0 +1,5 @@
+{
+  "collectionName": "components_shared_badges",
+  "info": {"displayName": "Badge", "description": "Short label for hero / trip qualities"},
+  "attributes": {"label": {"type": "string", "required": true}}
+}

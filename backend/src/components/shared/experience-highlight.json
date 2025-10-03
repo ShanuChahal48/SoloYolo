@@ -1,0 +1,5 @@
+{
+  "collectionName": "components_shared_experience_highlights",
+  "info": {"displayName": "Experience Highlight", "description": "Short trip highlight badge"},
+  "attributes": {"label": {"type": "string", "required": true}}
+}

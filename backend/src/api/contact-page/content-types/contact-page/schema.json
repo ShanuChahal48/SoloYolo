@@ -17,6 +17,11 @@
     "subheading": {
       "type": "text"
     },
+    "hero_media": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images", "videos"]
+    },
     "email": {
       "type": "email"
     },

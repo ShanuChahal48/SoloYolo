@@ -21,7 +21,10 @@ export async function fetchApi(endpoint: string, query?: Record<string, unknown>
     try {
         const response = await fetch(requestUrl, mergedOptions);
         if (!response.ok) {
-            console.error(`Error fetching ${requestUrl}: ${response.statusText}`);
+            // Gracefully silence 403 for optional single types (e.g., footer) while still surfacing other issues.
+            if (response.status !== 403) {
+                console.error(`Error fetching ${requestUrl}: ${response.status} ${response.statusText}`);
+            }
             return null;
         }
         const data = await response.json();
@@ -259,3 +262,25 @@ export async function getFeaturedTrips() {
     return res?.data || [];
 }
 // Deprecated: media URL helper moved to '@/lib/media'
+
+// --- New: Single types for dynamic site chrome ---
+export async function getHomePage() {
+    const query = { populate: { hero_media: true, trip_badges: true, events_background: true } } as const;
+    const res = await fetchApi('/home-page', query);
+    return res?.data || null;
+}
+
+export async function getFooterSettings() {
+    // quick_links removed from schema; only populate background image now.
+    // Use no-store so footer reflects updates immediately (avoid 60s ISR delay).
+    const query = { populate: { background_image: true } } as const;
+    const res = await fetchApi('/footer', query, { cache: 'no-store' });
+    return res?.data || null;
+}
+
+// Placeholder: community page single type if/when added
+export async function getCommunityPage() {
+    const query = { populate: '*' } as const;
+    const res = await fetchApi('/community-page', query);
+    return res?.data || null;
+}

@@ -1,4 +1,5 @@
-import { getBlogPosts, getTestimonials } from '@/lib/api';
+import { getBlogPosts, getTestimonials, getCommunityPage } from '@/lib/api';
+import { getMediaUrl } from '@/lib/media';
 import type { BlogPost, Testimonial, StrapiMedia } from '@/types';
 import TestimonialCard from '@/components/TestimonialCard';
 import CommunityScroller from '@/components/CommunityScroller';
@@ -7,10 +8,11 @@ import CommunityScroller from '@/components/CommunityScroller';
 export const revalidate = 60;
 
 export default async function CommunityPage() {
-  const [posts, testimonials] = await Promise.all([
+  const [posts, testimonials, communityPage] = await Promise.all([
     getBlogPosts(),
-    getTestimonials()
-  ]) as [BlogPost[], Testimonial[]];
+    getTestimonials(),
+    getCommunityPage()
+  ]) as [BlogPost[], Testimonial[], any];
 
   const hasPosts = posts.length > 0;
   const hasTestimonials = testimonials.length > 0;
@@ -28,16 +30,25 @@ export default async function CommunityPage() {
       }}
     >
       {/* Hero Section */}
-      <section className="relative bg-transparent text-white py-24 text-center overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-white/10 rounded-full animate-float" />
-          <div className="absolute top-40 right-20 w-24 h-24 bg-amber-400/20 rounded-full animate-float" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-20 left-20 w-16 h-16 bg-teal-400/20 rounded-full animate-float" style={{ animationDelay: '2s' }} />
-        </div>
+      <section className="relative bg-transparent text-white overflow-hidden">
+        {(() => {
+          const attrs = communityPage?.attributes || communityPage;
+          const media = attrs?.hero_media?.data || attrs?.hero_media;
+          const url = getMediaUrl(media);
+          if (!url) return null; // allow parent starfield to show through identically
+          const isVideo = url.match(/\.(mp4|webm|mov)$/i);
+          return isVideo ? (
+            <video key={url} src={url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+          ) : (
+            <img key={url} src={url} alt={attrs?.hero_title || 'Community background'} className="absolute inset-0 w-full h-full object-cover" />
+          );
+        })()}
         <div className="relative z-10 container mx-auto px-6">
-          <div className="animate-fade-in-up">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">Traveler Stories</h1>
-            <p className="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">Dive into authentic experiences, travel tips, and inspiring stories from fellow adventurers who have explored the world with us.</p>
+          <div className="min-h-[55vh] md:min-h-[60vh] flex flex-col justify-center items-center text-center pt-28 md:pt-32 pb-16">
+            <div className="animate-fade-in-up max-w-5xl">
+              <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">{(communityPage?.attributes || communityPage)?.hero_title || 'Traveler Stories'}</h1>
+              <p className="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">{(communityPage?.attributes || communityPage)?.hero_subtitle || 'Dive into authentic experiences, travel tips, and inspiring stories from fellow adventurers who have explored the world with us.'}</p>
+            </div>
           </div>
         </div>
       </section>

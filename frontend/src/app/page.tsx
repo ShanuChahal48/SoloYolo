@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getTestimonials, getBlogPosts } from '@/lib/api';
+import { getTestimonials, getBlogPosts, getHomePage } from '@/lib/api';
+import { getMediaUrl } from '@/lib/media';
 import FeaturedTrips from '@/components/FeaturedTrips';
 import TestimonialCard from '@/components/TestimonialCard';
 import BlogCard from '@/components/BlogCard';
@@ -8,9 +9,10 @@ import { BlogPost, TestimonialItem } from '@/types';
 
 export default async function HomePage() {
   // Fetch all necessary data in parallel for maximum efficiency
-  const [testimonials, blogPosts] = await Promise.all([
+  const [testimonials, blogPosts, homePage] = await Promise.all([
     getTestimonials(),
     getBlogPosts(),
+    getHomePage(),
   ]);
 
   // We only want to show a few items on the homepage to keep it clean
@@ -32,16 +34,47 @@ export default async function HomePage() {
       {/* --- Hero Section --- */}
       <section className="relative h-screen flex items-center justify-center text-white text-center overflow-hidden">
         {/* Subtle Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/30 via-black/20 to-black/40 z-10"></div>
-        <video
-          src="/travelVideo.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{objectFit: 'cover'}}
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/25 to-black/50 z-10" />
+        {(() => {
+          const attrs = homePage?.attributes || homePage; // support normalized/flat
+          const media = attrs?.hero_media?.data || attrs?.hero_media; // strapi might wrap
+          const mediaUrl = getMediaUrl(media);
+          if (mediaUrl) {
+            const isVideo = mediaUrl.match(/\.(mp4|webm|mov)$/i);
+            return isVideo ? (
+              <video
+                key={mediaUrl}
+                src={mediaUrl}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : (
+              <Image
+                key={mediaUrl}
+                src={mediaUrl}
+                alt={attrs?.hero_title || 'Hero background'}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+              />
+            );
+          }
+          // fallback existing local video
+          return (
+            <video
+              src="/travelVideo.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          );
+        })()}
         {/* Floating Elements */}
         <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float z-20"></div>
         <div className="absolute top-40 right-20 w-16 h-16 bg-amber-400/20 rounded-full animate-float z-20" style={{animationDelay: '1s'}}></div>
@@ -49,11 +82,26 @@ export default async function HomePage() {
         <div className="relative z-30 container mx-auto px-6 max-w-6xl">
           <div className="animate-fade-in-up">
             <h1 className="text-responsive-3xl font-serif font-bold tracking-tight leading-tight mb-6 gradient-text">
-              Travel Beyond The Ordinary
+              {(homePage?.attributes || homePage)?.hero_title || 'Travel Beyond The Ordinary'}
             </h1>
             <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-gray-100 leading-relaxed">
-              Curated journeys for the modern explorer. Discover your next unforgettable adventure with us.
+              {(homePage?.attributes || homePage)?.hero_subtitle || 'Curated journeys for the modern explorer. Discover your next unforgettable adventure with us.'}
             </p>
+            {(() => {
+              const badges = (homePage?.attributes || homePage)?.trip_badges;
+              if (Array.isArray(badges) && badges.length) {
+                return (
+                  <div className="flex flex-wrap gap-3 justify-center mb-6">
+                    {badges.map((b: any, i: number) => (
+                      <span key={i} className="px-4 py-2 rounded-full bg-white/10 backdrop-blur text-sm font-medium tracking-wide border border-white/20">
+                        {b.label}
+                      </span>
+                    ))}
+                  </div>
+                );
+              }
+              return null;
+            })()}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link 
                 href="/trips" 

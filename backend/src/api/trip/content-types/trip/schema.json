@@ -73,6 +73,11 @@
     "booking_url_verified": {
       "type": "boolean",
       "default": false
+    },
+    "experience_highlights": {
+      "type": "component",
+      "repeatable": true,
+      "component": "shared.experience-highlight"
     }
   }
 }

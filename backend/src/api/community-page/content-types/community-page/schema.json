@@ -1,0 +1,15 @@
+{
+  "kind": "singleType",
+  "collectionName": "community_pages",
+  "info": {
+    "singularName": "community-page",
+    "pluralName": "community-pages",
+    "displayName": "Community Page"
+  },
+  "options": {"draftAndPublish": true},
+  "attributes": {
+    "hero_title": {"type": "string"},
+    "hero_subtitle": {"type": "text"},
+    "hero_media": {"type": "media", "multiple": false, "allowedTypes": ["images", "videos"]}
+  }
+}

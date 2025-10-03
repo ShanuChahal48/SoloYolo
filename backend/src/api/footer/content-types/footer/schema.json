@@ -1,0 +1,16 @@
+{
+  "kind": "singleType",
+  "collectionName": "footer_settings",
+  "info": {"singularName": "footer", "pluralName": "footers", "displayName": "Footer"},
+  "options": {"draftAndPublish": true},
+  "attributes": {
+    "company_name": {"type": "string"},
+    "tagline": {"type": "string"},
+    "email": {"type": "email"},
+    "phone": {"type": "string"},
+    "instagram_url": {"type": "string"},
+    "facebook_url": {"type": "string"},
+  "youtube_url": {"type": "string"},
+    "background_image": {"type": "media", "multiple": false, "allowedTypes": ["images"]}
+  }
+}

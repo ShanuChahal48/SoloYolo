@@ -32,6 +32,7 @@ interface TripAttributes {
   slug?: string;
   booking_url?: string | null;
   booking_url_verified?: boolean;
+  experience_highlights?: { label: string }[];
 }
 
 type TripEntity = { id: number; attributes: TripAttributes } | (TripAttributes & { id?: number });
@@ -56,7 +57,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     ? (trip as { attributes: TripAttributes }).attributes
     : (trip as TripAttributes);
 
-  const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug, booking_url, booking_url_verified } = rawAttributes;
+  const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug, booking_url, booking_url_verified, experience_highlights } = rawAttributes;
 
   // Prefer confirmed booking URL if verified
   const confirmedBookingUrl: string | undefined = booking_url || undefined;
@@ -112,7 +113,16 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
         {/* Floating Title */}
         <div className="absolute inset-0 flex items-end justify-center pb-16">
           <div className="text-center text-white animate-fade-in-up">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-4 drop-shadow-lg">{title}</h1>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 drop-shadow-lg">{title}</h1>
+            {Array.isArray(experience_highlights) && experience_highlights.length > 0 && (
+              <div className="flex flex-wrap justify-center gap-3 mb-6">
+                {experience_highlights.map((h, i) => (
+                  <span key={i} className="px-4 py-2 bg-white/10 backdrop-blur rounded-full text-sm font-medium tracking-wide border border-white/20 text-teal-100">
+                    {h.label}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="flex items-center justify-center space-x-6 text-teal-200">
               <div className="flex items-center space-x-2">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">

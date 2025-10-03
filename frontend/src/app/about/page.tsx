@@ -1,6 +1,13 @@
 import { getAboutPage } from '@/lib/api';
 import { StrapiMedia } from '@/types'; // Assuming you have a types file
 import Image from 'next/image';
+
+// Ensure this route is always dynamic so nested footer fetch (no-store) is not
+// served from an ISR cached payload. Without this, the page could be cached
+// for 60s (default in fetchApi) and footer updates wouldn't appear here while
+// appearing on other dynamic pages.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { marked } from 'marked';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';

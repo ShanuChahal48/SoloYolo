@@ -1,0 +1,17 @@
+{
+  "kind": "singleType",
+  "collectionName": "home_pages",
+  "info": {
+    "singularName": "home-page",
+    "pluralName": "home-pages",
+    "displayName": "Home Page"
+  },
+  "options": {"draftAndPublish": true},
+  "attributes": {
+    "hero_title": {"type": "string"},
+    "hero_subtitle": {"type": "text"},
+    "hero_media": {"type": "media", "multiple": false, "allowedTypes": ["images", "videos"]},
+    "trip_badges": {"type": "component", "repeatable": true, "component": "shared.badge"},
+    "events_background": {"type": "media", "multiple": false, "allowedTypes": ["images", "videos"]}
+  }
+}
