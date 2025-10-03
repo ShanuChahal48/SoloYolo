@@ -1,5 +1,6 @@
 "use client";
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { extractMediaAttributes, getMediaUrl, StrapiMedia } from '@/lib/media';
 
@@ -11,6 +12,8 @@ interface TripGalleryLightboxProps {
 
 export default function TripGalleryLightbox({ images, thumbClassName = '', gridClassName = '' }: TripGalleryLightboxProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [dragX, setDragX] = useState(0);
+  const touchDataRef = useRef<{ x: number; y: number; time: number } | null>(null);
 
   const open = useCallback((index: number) => setActiveIndex(index), []);
   const close = useCallback(() => setActiveIndex(null), []);
@@ -41,6 +44,60 @@ export default function TripGalleryLightbox({ images, thumbClassName = '', gridC
       return () => { document.body.style.overflow = original; };
     }
   }, [activeIndex]);
+
+  // Reset drag offset when image changes or closes
+  useEffect(() => { setDragX(0); }, [activeIndex]);
+
+  // Touch / swipe handlers (mobile navigation)
+  const SWIPE_THRESHOLD = 50; // px
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    const t = e.touches[0];
+    touchDataRef.current = { x: t.clientX, y: t.clientY, time: Date.now() };
+    setDragX(0);
+  };
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchDataRef.current || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - touchDataRef.current.x;
+    const dy = t.clientY - touchDataRef.current.y;
+    // Only show horizontal drag feedback if horizontal intent is stronger
+    if (Math.abs(dx) > Math.abs(dy)) {
+      e.preventDefault(); // prevent vertical scroll bounce while swiping
+      setDragX(dx);
+    }
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!touchDataRef.current) return;
+    const tData = touchDataRef.current;
+    const dt = Date.now() - tData.time;
+    const changed = e.changedTouches[0];
+    const dx = changed.clientX - tData.x;
+    const dy = changed.clientY - tData.y;
+    touchDataRef.current = null;
+
+    // Quick flicks can use a lower threshold based on time
+    const velocityBoost = dt < 250 ? 0.6 : 1; // allow shorter swipe on quick flick
+    const effectiveThreshold = SWIPE_THRESHOLD * velocityBoost;
+
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > effectiveThreshold) {
+      if (dx < 0) next(); else prev();
+    }
+    setDragX(0);
+  };
+
+  // Portal root (lazy to avoid SSR mismatch)
+  const [portalEl, setPortalEl] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    // Re-use existing portal root or create one
+    let el = document.getElementById('overlay-root') as HTMLElement | null;
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'overlay-root';
+      document.body.appendChild(el);
+    }
+    setPortalEl(el);
+  }, []);
 
   return (
     <>
@@ -79,11 +136,14 @@ export default function TripGalleryLightbox({ images, thumbClassName = '', gridC
         })}
       </div>
 
-      {activeIndex !== null && (
+      {portalEl && activeIndex !== null && createPortal(
         <div
-          className="fixed inset-0 z-[4000] flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-in"
+          className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/90 backdrop-blur-md animate-fade-in"
           role="dialog"
           aria-modal="true"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <button
             onClick={close}
@@ -110,7 +170,13 @@ export default function TripGalleryLightbox({ images, thumbClassName = '', gridC
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
             </svg>
           </button>
-          <div className="relative w-[90vw] h-[70vh] max-w-5xl pointer-events-auto">
+          <div
+            className="relative w-[90vw] h-[70vh] max-w-5xl pointer-events-auto select-none"
+            style={{
+              transform: `translateX(${dragX}px)`,
+              transition: dragX === 0 ? 'transform 0.25s ease' : 'none'
+            }}
+          >
             {(() => {
               const current = images[activeIndex];
               const url = getMediaUrl(current);
@@ -137,7 +203,6 @@ export default function TripGalleryLightbox({ images, thumbClassName = '', gridC
               );
             })()}
           </div>
-          {/* Dots / Thumbnails footer */}
           <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-2 px-4 pointer-events-auto">
             {images.map((_, i) => (
               <button
@@ -148,7 +213,8 @@ export default function TripGalleryLightbox({ images, thumbClassName = '', gridC
               />
             ))}
           </div>
-        </div>
+        </div>,
+        portalEl
       )}
     </>
   );

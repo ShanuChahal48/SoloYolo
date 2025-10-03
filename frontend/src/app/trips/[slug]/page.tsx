@@ -7,12 +7,13 @@ import Image from 'next/image';
 // Removed unused Link import
 import BookingButton from '@/components/BookingButton';
 import { resolveServerSideBookingLink } from '@/lib/logoutWorld';
-import { getMediaUrl, getMediaAlt, extractMediaAttributes, StrapiMedia } from '@/lib/media';
+import { getMediaUrl, getMediaAlt, StrapiMedia } from '@/lib/media';
 import TripGalleryLightboxClient from '@/components/TripGalleryLightboxClient';
+import TripEnquiry from '@/components/TripEnquiry';
 import React from 'react';
 
 
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
+// (Removed unused STRAPI_URL constant)
 
 // Removed unused getStrapiImageUrl helper (replaced by getMediaUrl)
 
@@ -41,8 +42,9 @@ function hasAttributes(entity: TripEntity | null | undefined): entity is { id: n
 
 // Media helpers now imported from '@/lib/media'
 
-export default async function TripDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+export default async function TripDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Next.js 15: dynamic route params are async – must await before accessing properties
+  const { slug } = await params;
   const trip = await getTripBySlug(slug);
 
   if (!trip) {
@@ -207,9 +209,7 @@ export default async function TripDetailPage({ params }: { params: { slug: strin
               <div className="space-y-4">
                 {/* Pass through original title/slug for client analytic event; server prevalidated link used for SEO in JSON-LD */}
                 <BookingButton title={title} internalSlug={internalTripSlug} directUrl={confirmedBookingUrl} />
-                <button className="w-full bg-gray-100 text-gray-800 font-bold py-4 px-6 rounded-xl text-lg hover:bg-gray-200 transition-all duration-300 hover-lift">
-                  Enquire
-                </button>
+                <TripEnquiry tripTitle={title} tripSlug={internalTripSlug} />
               </div>
             </div>
           </aside>

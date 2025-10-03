@@ -3,6 +3,7 @@ import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 
+// Removed unused STRAPI_URL constant (media helpers/build use env directly elsewhere)
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
 const getImageUrl = (
@@ -19,9 +20,10 @@ const getImageUrl = (
   return url.startsWith('http') ? url : `${STRAPI_URL}${url}`;
 };
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  // Ensure slug is a string (defensive against unexpected runtime shapes)
-  const slug = typeof params.slug === 'string' ? params.slug : Array.isArray(params.slug) ? params.slug[0] : '';
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  // Await dynamic params (Next.js 15+) then defensively normalize to a string
+  const awaited = await params;
+  const slug = typeof awaited.slug === 'string' ? awaited.slug : Array.isArray(awaited.slug) ? awaited.slug[0] : '';
   const post = await getPostBySlug(slug);
 
   if (!post) {
