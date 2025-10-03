@@ -2,6 +2,7 @@ import { getContactPage } from '@/lib/api';
 import { getMediaUrl } from '@/lib/media';
 import ContactForm from '@/components/ContactForm';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import Image from 'next/image';
 
 export default async function ContactPage() {
     const attributes = await getContactPage();
@@ -29,14 +30,22 @@ export default async function ContactPage() {
             {/* Hero Section with Animation */}
                         <section className="relative text-white overflow-hidden">
                             {(() => {
-                                const media = attributes.hero_media?.data || attributes.hero_media;
-                                const url = getMediaUrl(media);
+                                const rawMedia = attributes.hero_media;
+                                const m = rawMedia && typeof rawMedia === 'object' && 'data' in rawMedia ? rawMedia.data : rawMedia;
+                                const url = getMediaUrl(m);
                                 if (!url) return null; // rely on page background for consistency
                                 const isVideo = url.match(/\.(mp4|webm|mov)$/i);
                                 return isVideo ? (
                                     <video key={url} src={url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
                                 ) : (
-                                    <img key={url} src={url} alt={attributes.headline || 'Contact background'} className="absolute inset-0 w-full h-full object-cover" />
+                                    <Image
+                                      key={url}
+                                      src={url}
+                                      alt={attributes.headline || 'Contact background'}
+                                      fill
+                                      sizes="100vw"
+                                      className="object-cover"
+                                    />
                                 );
                             })()}
                             <div className="relative z-10 container mx-auto px-6">

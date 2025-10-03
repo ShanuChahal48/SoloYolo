@@ -9,7 +9,22 @@ import { getMediaUrl } from '@/lib/media';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0; // explicit clarity; no ISR caching
 
-interface FooterProps { data?: any }
+interface StrapiMediaLike { url?: string; alternativeText?: string }
+
+interface FooterAttributes {
+  company_name?: string;
+  tagline?: string;
+  email?: string;
+  phone?: string;
+  background_image?: { data?: unknown } | null;
+  instagram_url?: string;
+  facebook_url?: string;
+  youtube_url?: string;
+}
+
+interface FooterEntity { id?: number; attributes?: FooterAttributes }
+
+interface FooterProps { data?: FooterEntity | FooterAttributes | null }
 
 export default async function Footer({ data }: FooterProps) {
   let footer = data;
@@ -20,8 +35,13 @@ export default async function Footer({ data }: FooterProps) {
       console.error('[Footer] Failed to fetch footer settings:', e);
     }
   }
-  const attrs = footer?.attributes || footer;
-  const bgMedia = attrs?.background_image?.data || attrs?.background_image;
+  const attrs: FooterAttributes = (footer && typeof footer === 'object' && 'attributes' in footer)
+    ? (footer as FooterEntity).attributes || {}
+    : (footer as FooterAttributes) || {};
+  const rawBg = attrs?.background_image;
+  const bgMedia: StrapiMediaLike | undefined = rawBg && typeof rawBg === 'object' && 'data' in rawBg
+    ? (rawBg as { data?: StrapiMediaLike | undefined }).data
+    : (rawBg as StrapiMediaLike | null | undefined) || undefined;
   const bgUrl = getMediaUrl(bgMedia) || '/forest_footer.jpg';
 
   const quickLinks: { label: string; href: string }[] = [
@@ -99,7 +119,7 @@ export default async function Footer({ data }: FooterProps) {
                 </svg>
                 <div>
                   <p className="text-gray-200">{attrs?.email || 'soloyoloindia@gmail.com'}</p>
-                  <p className="text-sm text-gray-300">We'll respond within 24 hours</p>
+                  <p className="text-sm text-gray-300">We&apos;ll respond within 24 hours</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">

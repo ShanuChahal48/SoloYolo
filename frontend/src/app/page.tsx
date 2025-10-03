@@ -7,6 +7,8 @@ import TestimonialCard from '@/components/TestimonialCard';
 import BlogCard from '@/components/BlogCard';
 import { BlogPost, TestimonialItem } from '@/types';
 
+interface TripBadge { label: string }
+
 export default async function HomePage() {
   // Fetch all necessary data in parallel for maximum efficiency
   const [testimonials, blogPosts, homePage] = await Promise.all([
@@ -92,7 +94,7 @@ export default async function HomePage() {
               if (Array.isArray(badges) && badges.length) {
                 return (
                   <div className="flex flex-wrap gap-3 justify-center mb-6">
-                    {badges.map((b: any, i: number) => (
+                    {badges.map((b: TripBadge, i: number) => (
                       <span key={i} className="px-4 py-2 rounded-full bg-white/10 backdrop-blur text-sm font-medium tracking-wide border border-white/20">
                         {b.label}
                       </span>

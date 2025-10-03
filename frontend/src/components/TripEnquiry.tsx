@@ -71,7 +71,7 @@ export default function TripEnquiry({ tripTitle, tripSlug, buttonClassName }: Tr
         // keep form but disable? Up to UX. We'll clear after success.
         setForm(initialState);
       }
-    } catch (err) {
+  } catch {
       setStatus({ ok: false, message: 'Network error' });
     } finally {
       setSubmitting(false);

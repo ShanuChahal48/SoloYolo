@@ -1,18 +1,34 @@
 import { getBlogPosts, getTestimonials, getCommunityPage } from '@/lib/api';
-import { getMediaUrl } from '@/lib/media';
-import type { BlogPost, Testimonial, StrapiMedia } from '@/types';
+import { getMediaUrl, type StrapiMedia as LibStrapiMedia } from '@/lib/media';
+import type { BlogPost, Testimonial } from '@/types';
 import TestimonialCard from '@/components/TestimonialCard';
 import CommunityScroller from '@/components/CommunityScroller';
+import Image from 'next/image';
 
 // Revalidate every 60 seconds (same cadence as other content fetches)
 export const revalidate = 60;
+
+interface CommunityPageAttributes {
+  hero_title?: string;
+  hero_subtitle?: string;
+  hero_media?: { data?: LibStrapiMedia } | LibStrapiMedia | null;
+}
+
+interface CommunityPageEntity {
+  id?: number;
+  attributes?: CommunityPageAttributes;
+  hero_title?: string; // tolerate already-flattened shape
+  hero_subtitle?: string;
+  hero_media?: { data?: LibStrapiMedia } | LibStrapiMedia | null;
+}
+
 
 export default async function CommunityPage() {
   const [posts, testimonials, communityPage] = await Promise.all([
     getBlogPosts(),
     getTestimonials(),
     getCommunityPage()
-  ]) as [BlogPost[], Testimonial[], any];
+  ]) as [BlogPost[], Testimonial[], CommunityPageEntity | null];
 
   const hasPosts = posts.length > 0;
   const hasTestimonials = testimonials.length > 0;
@@ -33,14 +49,25 @@ export default async function CommunityPage() {
       <section className="relative bg-transparent text-white overflow-hidden">
         {(() => {
           const attrs = communityPage?.attributes || communityPage;
-          const media = attrs?.hero_media?.data || attrs?.hero_media;
+          const rawMedia = attrs?.hero_media;
+          const media = (rawMedia && typeof rawMedia === 'object' && 'data' in rawMedia)
+            ? (rawMedia as { data?: LibStrapiMedia }).data
+            : rawMedia as LibStrapiMedia | undefined;
           const url = getMediaUrl(media);
           if (!url) return null; // allow parent starfield to show through identically
           const isVideo = url.match(/\.(mp4|webm|mov)$/i);
           return isVideo ? (
             <video key={url} src={url} autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
           ) : (
-            <img key={url} src={url} alt={attrs?.hero_title || 'Community background'} className="absolute inset-0 w-full h-full object-cover" />
+            <Image
+              key={url}
+              src={url}
+              alt={attrs?.hero_title || 'Community background'}
+              fill
+              priority={false}
+              sizes="100vw"
+              className="object-cover"
+            />
           );
         })()}
         <div className="relative z-10 container mx-auto px-6">
@@ -99,7 +126,12 @@ export default async function CommunityPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {testimonials.map((t, i) => (
                 <div key={t.id} className="animate-fade-in-up hover-lift" style={{ animationDelay: `${i * 0.15}s` }}>
-                  <TestimonialCard testimonial={t as unknown as { attributes: { traveler_name: string; trip_taken: string; quote: string; rating: number; picture: { data: StrapiMedia } } }} />
+                  {/* Extend testimonial shape minimally to satisfy TestimonialCard */}
+                  {(() => {
+                    type Extended = typeof t & { attributes?: { traveler_name?: string; trip_taken?: string; quote?: string; rating?: number; picture?: { data?: LibStrapiMedia } } };
+                    const extended = t as Extended;
+                    return <TestimonialCard testimonial={extended} />;
+                  })()}
                 </div>
               ))}
             </div>

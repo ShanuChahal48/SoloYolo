@@ -1,5 +1,6 @@
 import Image from 'next/image';
-import { StrapiMedia } from '@/types';
+import { extractMediaAttributes, type StrapiMedia as LibStrapiMedia } from '@/lib/media';
+import type { StrapiMedia as TypesStrapiMedia } from '@/types';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL|| 'http://localhost:1337';
 
@@ -22,17 +23,13 @@ interface TestimonialCardProps {
       trip_taken?: string;
       quote?: string;
       rating?: number;
-      picture?: {
-        data?: StrapiMedia;
-      };
+      picture?: { data?: LibStrapiMedia | TypesStrapiMedia };
     };
     traveler_name?: string;
     trip_taken?: string;
     quote?: string;
     rating?: number;
-    picture?: {
-      data?: StrapiMedia;
-    };
+    picture?: { data?: LibStrapiMedia | TypesStrapiMedia };
   };
 }
 
@@ -42,17 +39,17 @@ export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
     trip_taken?: string;
     quote?: string;
     rating?: number;
-    picture?: { data?: StrapiMedia };
+    picture?: { data?: (LibStrapiMedia | TypesStrapiMedia) };
   };
   const { traveler_name, trip_taken, quote, rating, picture } = src;
   const safeRating = typeof rating === 'number' ? rating : 0;
-  let media: StrapiMedia | undefined = undefined;
-  if (picture && 'data' in picture && picture.data && picture.data.id) {
-    media = picture.data;
-  } else if (picture && 'id' in picture && typeof picture.id === 'number') {
-    media = picture as StrapiMedia;
+  type MediaUnion = LibStrapiMedia | TypesStrapiMedia | undefined;
+  let media: MediaUnion = undefined;
+  if (picture && 'data' in picture && picture.data) {
+    media = picture.data as (LibStrapiMedia | TypesStrapiMedia);
   }
-  const rawUrl = media?.formats?.thumbnail?.url || media?.url || '';
+  const attrs = extractMediaAttributes(media as LibStrapiMedia);
+  const rawUrl = attrs?.formats?.thumbnail?.url || attrs?.url || '';
   const imageUrl = rawUrl ? (rawUrl.startsWith('http') ? rawUrl : `${STRAPI_URL}${rawUrl}`) : '';
 
   return (

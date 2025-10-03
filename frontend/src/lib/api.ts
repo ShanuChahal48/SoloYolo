@@ -6,14 +6,19 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 /**
  * A utility function to make API requests to Strapi.
  */
-export async function fetchApi(endpoint: string, query?: Record<string, unknown>, options?: RequestInit) {
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        next: { revalidate: 60 } // Revalidate every 60 seconds
-    } as const;
-    const mergedOptions: RequestInit = { ...defaultOptions, ...options };
+export async function fetchApi(endpoint: string, query?: Record<string, unknown>, options?: RequestInit & { next?: { revalidate?: number | false } }) {
+    const isNoStore = options?.cache === 'no-store';
+    // Only attach revalidate when NOT explicitly no-store to avoid Next.js warning.
+    const base: RequestInit & { next?: { revalidate?: number | false } } = {
+        headers: { 'Content-Type': 'application/json' },
+        ...(isNoStore ? { cache: 'no-store' } : { next: { revalidate: 60 } })
+    };
+    const mergedOptions: RequestInit & { next?: { revalidate?: number | false } } = {
+        ...base,
+        ...options,
+        next: options?.next ?? base.next,
+        headers: { ...(base.headers || {}), ...(options?.headers || {}) }
+    };
     
     const queryString = qs.stringify(query, { encodeValuesOnly: true });
     const requestUrl = `${STRAPI_URL}/api${endpoint}${queryString ? `?${queryString}` : ''}`;
@@ -271,11 +276,21 @@ export async function getHomePage() {
 }
 
 export async function getFooterSettings() {
-    // quick_links removed from schema; only populate background image now.
-    // Use no-store so footer reflects updates immediately (avoid 60s ISR delay).
     const query = { populate: { background_image: true } } as const;
     const res = await fetchApi('/footer', query, { cache: 'no-store' });
-    return res?.data || null;
+    const data = res?.data || null;
+    if (!data) {
+        return {
+            attributes: {
+                company_name: 'Solo Yolo',
+                tagline: 'Crafting unforgettable journeys beyond the beaten path.',
+                email: 'soloyoloindia@gmail.com',
+                phone: '+1 (555) 123-4567',
+                background_image: null,
+            }
+        };
+    }
+    return data;
 }
 
 // Placeholder: community page single type if/when added
