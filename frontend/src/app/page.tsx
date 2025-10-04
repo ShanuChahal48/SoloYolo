@@ -81,21 +81,21 @@ export default async function HomePage() {
         <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float z-20"></div>
         <div className="absolute top-40 right-20 w-16 h-16 bg-amber-400/20 rounded-full animate-float z-20" style={{animationDelay: '1s'}}></div>
         <div className="absolute bottom-40 left-20 w-12 h-12 bg-teal-400/20 rounded-full animate-float z-20" style={{animationDelay: '2s'}}></div>
-        <div className="relative z-30 container mx-auto px-6 max-w-6xl">
-          <div className="animate-fade-in-up">
-            <h1 className="text-responsive-3xl font-serif font-bold tracking-tight leading-tight mb-6 gradient-text">
+        <div className="relative z-30 container mx-auto px-6 max-w-6xl" data-reveal-group>
+          <div data-reveal="fade-up">
+            <h1 className="text-responsive-3xl font-serif font-bold tracking-tight leading-tight mb-6 gradient-text" data-reveal="fade-up" data-reveal-delay="60">
               {(homePage?.attributes || homePage)?.hero_title || 'Travel Beyond The Ordinary'}
             </h1>
-            <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-gray-100 leading-relaxed">
+            <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8 text-gray-100 leading-relaxed" data-reveal="fade-up" data-reveal-delay="140">
               {(homePage?.attributes || homePage)?.hero_subtitle || 'Curated journeys for the modern explorer. Discover your next unforgettable adventure with us.'}
             </p>
             {(() => {
               const badges = (homePage?.attributes || homePage)?.trip_badges;
               if (Array.isArray(badges) && badges.length) {
                 return (
-                  <div className="flex flex-wrap gap-3 justify-center mb-6">
+                  <div className="flex flex-wrap gap-3 justify-center mb-6" data-reveal-group>
                     {badges.map((b: TripBadge, i: number) => (
-                      <span key={i} className="px-4 py-2 rounded-full bg-white/10 backdrop-blur text-sm font-medium tracking-wide border border-white/20">
+                      <span key={i} data-reveal="scale-in" data-reveal-delay={(i * 70).toString()} className="px-4 py-2 rounded-full bg-white/10 backdrop-blur text-sm font-medium tracking-wide border border-white/20">
                         {b.label}
                       </span>
                     ))}
@@ -104,16 +104,16 @@ export default async function HomePage() {
               }
               return null;
             })()}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center" data-reveal-group>
               <Link 
                 href="/trips" 
-                className="btn-primary text-lg px-8 py-4 hover-lift hover-glow"
+                className="btn-primary text-lg px-8 py-4 hover-lift hover-glow" data-reveal="fade-up" data-reveal-delay="180"
               >
                 Explore Our Trips
               </Link>
               <Link 
                 href="/about" 
-                className="btn-secondary text-lg px-8 py-4 hover-lift"
+                className="btn-secondary text-lg px-8 py-4 hover-lift" data-reveal="fade-up" data-reveal-delay="260"
               >
                 Learn More
               </Link>

@@ -125,7 +125,7 @@ export default async function CommunityPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {testimonials.map((t, i) => (
-                <div key={t.id} className="animate-fade-in-up hover-lift" style={{ animationDelay: `${i * 0.15}s` }}>
+                <div key={t.id} className="hover-lift" data-reveal="fade-up" data-reveal-delay={(i * 90).toString()}>
                   {/* Extend testimonial shape minimally to satisfy TestimonialCard */}
                   {(() => {
                     type Extended = typeof t & { attributes?: { traveler_name?: string; trip_taken?: string; quote?: string; rating?: number; picture?: { data?: LibStrapiMedia } } };

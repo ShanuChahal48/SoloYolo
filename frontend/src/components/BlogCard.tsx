@@ -92,7 +92,7 @@ export default function BlogCard({ post }: BlogCardProps) {
   const authorPicUrl = authorPicUrlRel ? (authorPicUrlRel.startsWith('http') ? authorPicUrlRel : `${STRAPI_URL}${authorPicUrlRel}`) : '';
 
   return (
-    <article className="w-[350px] flex-shrink-0 overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-white group focus:outline-none focus:ring-2 focus:ring-emerald-500">
+  <article className="w-[350px] flex-shrink-0 overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 bg-white group focus:outline-none focus:ring-2 focus:ring-emerald-500" data-reveal="fade-up">
         <div className="relative h-56 w-full overflow-hidden rounded-t-xl">
           <div className="absolute inset-0 z-10 pointer-events-none bg-gradient-to-br from-emerald-400/20 via-white/0 to-emerald-600/30 rounded-t-xl" />
           {imageUrl && !isVideo && (

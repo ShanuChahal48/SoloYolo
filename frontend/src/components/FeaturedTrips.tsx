@@ -36,23 +36,19 @@ export default async function FeaturedTrips() {
       {/* Remove light background elements for dark mode */}
       
       <div className="relative z-10 container mx-auto px-6">
-        <div className="text-center mb-16 animate-fade-in-up">
-          <h2 className="text-responsive-2xl font-serif font-bold text-white mb-6">
+        <div className="text-center mb-16" data-reveal-group>
+          <h2 className="text-responsive-2xl font-serif font-bold text-white mb-6" data-reveal="fade-up">
             Featured Trips
           </h2>
-          <p className="text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed" data-reveal="fade-up" data-reveal-delay="120">
             Hand-picked journeys that you won&apos;t want to miss.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" data-reveal-group>
           {featuredTrips.map((trip, index) => (
-            <div 
-              key={trip.id} 
-              className="animate-fade-in-up hover-lift"
-              style={{animationDelay: `${index * 0.2}s`}}
-            >
-              <TripCard trip={trip} />
+            <div key={trip.id} data-reveal="fade-up" data-reveal-delay={(index * 120).toString()} className="hover-lift">
+              <TripCard trip={trip} index={index} />
             </div>
           ))}
         </div>

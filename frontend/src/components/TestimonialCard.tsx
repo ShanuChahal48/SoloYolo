@@ -1,8 +1,6 @@
 import Image from 'next/image';
-import { extractMediaAttributes, type StrapiMedia as LibStrapiMedia } from '@/lib/media';
+import { extractMediaAttributes, type StrapiMedia as LibStrapiMedia, getMediaUrl } from '@/lib/media';
 import type { StrapiMedia as TypesStrapiMedia } from '@/types';
-
-const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL|| 'http://localhost:1337';
 
 // Star SVG component for rating
 const StarIcon = ({ filled }: { filled: boolean }) => (
@@ -45,12 +43,24 @@ export default function TestimonialCard({ testimonial }: TestimonialCardProps) {
   const safeRating = typeof rating === 'number' ? rating : 0;
   type MediaUnion = LibStrapiMedia | TypesStrapiMedia | undefined;
   let media: MediaUnion = undefined;
-  if (picture && 'data' in picture && picture.data) {
-    media = picture.data as (LibStrapiMedia | TypesStrapiMedia);
+  // Type guards for possible shapes coming from Strapi (wrapped or flat)
+  const isWrapped = (val: unknown): val is { data: LibStrapiMedia | TypesStrapiMedia } => {
+    if (typeof val !== 'object' || val === null) return false;
+    if (!('data' in (val as Record<string, unknown>))) return false;
+    const potential = (val as { data?: unknown }).data;
+    return typeof potential === 'object' && potential !== null;
+  };
+  const isFlatMedia = (val: unknown): val is LibStrapiMedia | TypesStrapiMedia =>
+    typeof val === 'object' && val !== null && (
+      'url' in (val as Record<string, unknown>) || 'formats' in (val as Record<string, unknown>)
+    );
+  if (picture) {
+    if (isWrapped(picture)) media = picture.data as MediaUnion;
+    else if (isFlatMedia(picture)) media = picture;
   }
   const attrs = extractMediaAttributes(media as LibStrapiMedia);
-  const rawUrl = attrs?.formats?.thumbnail?.url || attrs?.url || '';
-  const imageUrl = rawUrl ? (rawUrl.startsWith('http') ? rawUrl : `${STRAPI_URL}${rawUrl}`) : '';
+  const prioritized = attrs?.formats?.thumbnail?.url || attrs?.url;
+  const imageUrl = prioritized ? getMediaUrl({ url: prioritized }) : '';
 
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg flex flex-col h-full">

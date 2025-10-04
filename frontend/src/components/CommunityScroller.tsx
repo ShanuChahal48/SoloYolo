@@ -40,14 +40,16 @@ export default function CommunityScroller({ posts }: Props) {
         ref={scrollRef}
         className="flex overflow-x-auto space-x-8 pb-8 -mx-6 px-6 scrollbar-hide"
       >
-        {posts.map(post => {
+        {posts.map((post, i) => {
           const attr = post.attributes;
           if (!attr?.slug) return null;
           return (
             <Link
               href={`/community/${attr.slug}`}
               key={post.id}
-              className="animate-fade-in-up hover-lift"
+              className="hover-lift"
+              data-reveal="fade-up"
+              data-reveal-delay={(i * 110).toString()}
               aria-label={`Open blog post: ${attr.title}`}
             >
               <BlogCard post={post} />

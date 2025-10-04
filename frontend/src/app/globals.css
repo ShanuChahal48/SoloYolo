@@ -320,3 +320,53 @@ body {
     scrollbar-width: none;
   }
 }
+
+/* -------------------------------------------------- */
+/* Scroll Reveal System                               */
+/* -------------------------------------------------- */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(var(--reveal-translate-y, 28px)) translateX(var(--reveal-translate-x, 0)) scale(var(--reveal-scale, 1));
+  transition:
+    opacity var(--reveal-duration, 700ms) var(--reveal-ease, cubic-bezier(.22,.72,.26,1)),
+    transform var(--reveal-duration, 700ms) var(--reveal-ease, cubic-bezier(.22,.72,.26,1));
+  will-change: opacity, transform;
+}
+
+[data-reveal].reveal-active { opacity: 1; transform: translateY(0) translateX(0) scale(1); }
+[data-reveal="fade-up"]    { --reveal-translate-y: 28px; }
+[data-reveal="fade-down"]  { --reveal-translate-y: -28px; }
+[data-reveal="fade-left"]  { --reveal-translate-x: 32px; }
+[data-reveal="fade-right"] { --reveal-translate-x: -32px; }
+[data-reveal="scale-in"]   { --reveal-scale: .92; }
+[data-reveal="zoom-out"]   { --reveal-scale: 1.08; }
+[data-reveal="lift"]       { --reveal-translate-y: 42px; }
+
+[data-reveal-group] > [data-reveal] { --reveal-duration: 750ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1 !important; transform: none !important; transition: none !important; animation: none !important; }
+}
+
+.reveal-delay-1 { transition-delay: 60ms; }
+.reveal-delay-2 { transition-delay: 120ms; }
+.reveal-delay-3 { transition-delay: 180ms; }
+.reveal-delay-4 { transition-delay: 240ms; }
+.reveal-delay-5 { transition-delay: 300ms; }
+
+/* (Header scroll state now handled via conditional classes in component) */
+
+/* Hydration-safe header scroll enhancements */
+[data-header-scrolled="true"] {
+  background: rgba(0,0,0,0.55) !important;
+  backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: 0 4px 24px -6px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.05) inset;
+}
+[data-header-scrolled="true"] [data-nav-pill] {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.09), 0 2px 6px -2px rgba(0,0,0,0.45);
+}
+[data-header-scrolled="true"] [data-nav-pill] a[role="menuitem"][aria-current="page"] {
+  box-shadow: 0 4px 12px -4px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1) inset;
+}

@@ -5,6 +5,7 @@ import { getMediaUrl, extractMediaAttributes, StrapiMedia } from '@/lib/media';
 
 interface TripCardProps {
   trip: Trip;
+  index?: number; // for optional per-card delay composition if needed later
 }
 
 // STRAPI_URL not needed directly; media helpers build absolute URLs.
@@ -30,7 +31,7 @@ export default function TripCard({ trip }: TripCardProps) {
   const mediaAttrs = extractMediaAttributes(media);
 
   return (
-  <Link href={`/trips/${slug}`} className="group block overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 bg-black/60 hover-lift backdrop-blur-sm">
+  <Link href={`/trips/${slug}`} className="group block overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-500 bg-black/60 hover-lift backdrop-blur-sm" data-reveal="fade-up">
   <div className="relative overflow-hidden">
         {imageUrl ? (
           <Image

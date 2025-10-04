@@ -252,7 +252,11 @@ export async function getPostBySlug(slug: string) {
 export async function getTestimonials() {
     const query = {
         sort: ['traveler_name:asc'],
-        populate: ['picture'],
+        populate: {
+            picture: {
+                populate: '*'
+            }
+        },
     } as const;
     const res = await fetchApi('/testimonials', query);
     return res?.data || [];
@@ -277,7 +281,8 @@ export async function getHomePage() {
 
 export async function getFooterSettings() {
     const query = { populate: { background_image: true } } as const;
-    const res = await fetchApi('/footer', query, { cache: 'no-store' });
+    // Use ISR (5 minutes) instead of no-store to allow static rendering
+    const res = await fetchApi('/footer', query, { next: { revalidate: 300 } });
     const data = res?.data || null;
     if (!data) {
         return {

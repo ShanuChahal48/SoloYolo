@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import WhatsAppChatButton from "../components/WhatsAppChatButton";
+import ScrollRevealProvider from "../components/ScrollRevealProvider";
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,6 +37,7 @@ export default function RootLayout({
         }}
       >
         <Header />
+        <ScrollRevealProvider />
         <main>
           {children}
         </main>

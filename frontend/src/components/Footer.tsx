@@ -3,11 +3,7 @@ import Link from 'next/link';
 import { getFooterSettings } from '@/lib/api';
 import { getMediaUrl } from '@/lib/media';
 
-// Force this component (and any page/layout rendering it) to be dynamic so
-// footer data is always fetched at request time, avoiding stale or missing
-// values on otherwise static routes like /about and /trips.
-export const dynamic = 'force-dynamic';
-export const revalidate = 0; // explicit clarity; no ISR caching
+// Footer now uses ISR via getFooterSettings (see api.ts) so we don't need to force dynamic.
 
 interface StrapiMediaLike { url?: string; alternativeText?: string }
 
@@ -70,7 +66,7 @@ export default async function Footer({ data }: FooterProps) {
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 flex flex-col justify-center items-center">
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 text-center md:text-left">
           {/* Company Info */}
-          <div className="flex flex-col items-center md:items-start justify-center h-full">
+          <div className="flex flex-col items-center md:items-start justify-center h-full" data-reveal="fade-up">
             <h3 className="text-3xl font-extrabold gradient-text mb-4">{attrs?.company_name || 'Solo Yolo'}</h3>
             <p className="text-gray-200 mb-6 leading-relaxed max-w-xs">
               {attrs?.tagline || 'Crafting unforgettable journeys beyond the beaten path. Your adventure starts here.'}
@@ -92,7 +88,7 @@ export default async function Footer({ data }: FooterProps) {
           </div>
 
           {/* Quick Links */}
-          <div className="flex flex-col items-center md:items-start justify-center h-full">
+          <div className="flex flex-col items-center md:items-start justify-center h-full" data-reveal="fade-up" data-reveal-delay="140">
             <h3 className="text-lg font-semibold mb-6 text-white">Quick Links</h3>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
@@ -110,7 +106,7 @@ export default async function Footer({ data }: FooterProps) {
 
 
           {/* Contact Info */}
-          <div className="flex flex-col items-center md:items-start justify-center h-full">
+          <div className="flex flex-col items-center md:items-start justify-center h-full" data-reveal="fade-up" data-reveal-delay="260">
             <h3 className="text-lg font-semibold mb-6 text-white">Get In Touch</h3>
             <div className="space-y-4">
               <div className="flex items-center space-x-3">

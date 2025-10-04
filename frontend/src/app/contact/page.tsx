@@ -51,8 +51,8 @@ export default async function ContactPage() {
                             <div className="relative z-10 container mx-auto px-6">
                                 <div className="min-h-[55vh] md:min-h-[60vh] flex flex-col justify-center items-center text-center pt-28 md:pt-32 pb-16">
                                   <div className="animate-fade-in-up max-w-5xl">
-                                      <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6">{attributes.headline || 'Contact Us'}</h1>
-                                      <p className="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed">
+                                      <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-6" data-reveal="fade-up">{attributes.headline || 'Contact Us'}</h1>
+                                      <p className="text-xl text-teal-100 max-w-3xl mx-auto leading-relaxed" data-reveal="fade-up" data-reveal-delay="120">
                                           {attributes.subheading || 'Have questions or want to plan your next adventure? Reach out to us!'}
                                       </p>
                                   </div>
@@ -72,7 +72,7 @@ export default async function ContactPage() {
                             </p>
                             
                             <div className="space-y-6">
-                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300">
+                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300" data-reveal="fade-up" data-reveal-delay="0">
                                     <div className="p-3 bg-teal-500/20 rounded-full">
                                         <Mail className="text-teal-400 h-6 w-6" />
                                     </div>
@@ -82,7 +82,7 @@ export default async function ContactPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300">
+                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300" data-reveal="fade-up" data-reveal-delay="140">
                                     <div className="p-3 bg-teal-500/20 rounded-full">
                                         <Phone className="text-teal-400 h-6 w-6" />
                                     </div>
@@ -92,7 +92,7 @@ export default async function ContactPage() {
                                     </div>
                                 </div>
                                 
-                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300">
+                                <div className="flex items-start space-x-4 p-6 bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-lg hover-lift transition-all duration-300" data-reveal="fade-up" data-reveal-delay="260">
                                     <div className="p-3 bg-teal-500/20 rounded-full">
                                         <MapPin className="text-teal-400 h-6 w-6" />
                                     </div>
