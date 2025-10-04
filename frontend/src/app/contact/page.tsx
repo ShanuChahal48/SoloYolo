@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+import { siteDefaults, absoluteUrl } from '@/lib/seo';
 import { getContactPage } from '@/lib/api';
 import { getMediaUrl } from '@/lib/media';
 import ContactForm from '@/components/ContactForm';
@@ -113,4 +115,17 @@ export default async function ContactPage() {
             </section>
     </main>
     );
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    const { name: SITE_NAME } = siteDefaults();
+    const title = `Contact Us | ${SITE_NAME}`;
+    const desc = 'Reach out for trip inquiries, partnerships, or community questions.';
+    return {
+        title,
+        description: desc,
+        alternates: { canonical: '/contact' },
+        openGraph: { title, description: desc, url: '/contact', images: [{ url: absoluteUrl('/home.jpg'), width: 1200, height: 630 }] },
+        twitter: { title, description: desc, images: [absoluteUrl('/home.jpg')], card: 'summary_large_image' }
+    };
 }

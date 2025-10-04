@@ -1,4 +1,6 @@
 import { getPostBySlug } from '@/lib/api';
+import type { Metadata } from 'next';
+import { excerpt, absoluteUrl, siteDefaults } from '@/lib/seo';
 import { notFound } from 'next/navigation';
 import { marked } from 'marked';
 import Image from 'next/image';
@@ -129,4 +131,25 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       </div>
     </main>
   );
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await getPostBySlug(params.slug);
+  if (!post) {
+    return { title: 'Post Not Found', description: 'Requested blog post does not exist.' };
+  }
+  interface PostShape { title?: string; content?: string; attributes?: PostShape }
+  const raw = post as PostShape;
+  const data = raw.attributes || raw;
+  const { name: SITE_NAME } = siteDefaults();
+  const title = data.title ? `${data.title} | ${SITE_NAME}` : `Blog Post | ${SITE_NAME}`;
+  const desc = excerpt(data.content || '', 160) || 'Travel story on our blog.';
+  const canonical = `/blog/${params.slug}`;
+  return {
+    title,
+    description: desc,
+    alternates: { canonical },
+    openGraph: { title, description: desc, url: canonical, images: [{ url: absoluteUrl('/home.jpg'), width: 1200, height: 630 }] },
+    twitter: { title, description: desc, images: [absoluteUrl('/home.jpg')], card: 'summary_large_image' }
+  };
 }

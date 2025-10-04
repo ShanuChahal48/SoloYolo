@@ -1,4 +1,6 @@
 import { getTrips } from '@/lib/api';
+import type { Metadata } from 'next';
+import { siteDefaults, absoluteUrl } from '@/lib/seo';
 import { Trip } from '../../types/index';
 import TripCard from '../../components/TripCard';
 import Image from 'next/image';
@@ -148,4 +150,17 @@ export default async function TripsPage() {
       </div>
   </main>
   );
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { name: SITE_NAME } = siteDefaults();
+  const title = `All Trips | ${SITE_NAME}`;
+  const desc = 'Browse curated expeditions and upcoming adventures across offbeat destinations.';
+  return {
+    title,
+    description: desc,
+    alternates: { canonical: '/trips' },
+    openGraph: { title, description: desc, url: '/trips', images: [{ url: absoluteUrl('/home.jpg'), width: 1200, height: 630 }] },
+    twitter: { title, description: desc, images: [absoluteUrl('/home.jpg')], card: 'summary_large_image' }
+  };
 }

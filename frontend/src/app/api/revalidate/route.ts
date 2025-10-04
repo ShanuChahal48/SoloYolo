@@ -13,10 +13,10 @@ export async function POST(req: NextRequest) {
     const paths: string[] = Array.isArray(body.paths) && body.paths.length ? body.paths : ['/'];
     const unique = Array.from(new Set(paths));
     unique.forEach(p => {
-      try { revalidatePath(p); } catch (e) { console.warn('Failed to revalidate path', p, e); }
+      try { revalidatePath(p); } catch { console.warn('Failed to revalidate path', p); }
     });
     return NextResponse.json({ revalidated: true, paths: unique });
-  } catch (e) {
+  } catch {
     return NextResponse.json({ error: 'Bad request' }, { status: 400 });
   }
 }

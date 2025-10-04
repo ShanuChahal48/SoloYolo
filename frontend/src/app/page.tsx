@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { getTestimonials, getBlogPosts, getHomePage } from '@/lib/api';
+import type { Metadata } from 'next';
+import { excerpt, absoluteUrl, siteDefaults } from '@/lib/seo';
 import { getMediaUrl } from '@/lib/media';
 import FeaturedTrips from '@/components/FeaturedTrips';
 import TestimonialCard from '@/components/TestimonialCard';
@@ -11,6 +13,31 @@ interface TripBadge { label: string }
 
 // Incremental Static Regeneration: rebuild homepage at most every 120s
 export const revalidate = 120;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const homePage = await getHomePage();
+  const attrs = homePage?.attributes || homePage;
+  const { name: SITE_NAME } = siteDefaults();
+  const title = (attrs?.hero_title ? `${attrs.hero_title} | ${SITE_NAME}` : `${SITE_NAME} – Travel Beyond The Ordinary`);
+  const desc = excerpt(attrs?.hero_subtitle || '', 160) || 'Curated journeys for the modern explorer.';
+  return {
+    title,
+    description: desc,
+    alternates: { canonical: '/' },
+    openGraph: {
+      title,
+      description: desc,
+      url: '/',
+      images: [{ url: absoluteUrl('/home.jpg'), width: 1200, height: 630, alt: SITE_NAME }]
+    },
+    twitter: {
+      title,
+      description: desc,
+      images: [absoluteUrl('/home.jpg')],
+      card: 'summary_large_image'
+    }
+  };
+}
 
 export default async function HomePage() {
   // Fetch all necessary data in parallel for maximum efficiency

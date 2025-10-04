@@ -1,4 +1,6 @@
 import { getBlogPosts, getTestimonials, getCommunityPage } from '@/lib/api';
+import type { Metadata } from 'next';
+import { excerpt, absoluteUrl, siteDefaults } from '@/lib/seo';
 import { getMediaUrl, type StrapiMedia as LibStrapiMedia } from '@/lib/media';
 import type { BlogPost, Testimonial } from '@/types';
 import TestimonialCard from '@/components/TestimonialCard';
@@ -140,4 +142,20 @@ export default async function CommunityPage() {
       )}
     </div>
   );
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const community = await getCommunityPage();
+  const attrs = community?.attributes || community;
+  const { name: SITE_NAME } = siteDefaults();
+  const titleBase = attrs?.hero_title || 'Traveler Stories';
+  const title = `${titleBase} | ${SITE_NAME}`;
+  const desc = excerpt(attrs?.hero_subtitle || 'Real experiences, tips and inspiration from our community.', 160);
+  return {
+    title,
+    description: desc,
+    alternates: { canonical: '/community' },
+    openGraph: { title, description: desc, url: '/community', images: [{ url: absoluteUrl('/home.jpg'), width: 1200, height: 630 }] },
+    twitter: { title, description: desc, images: [absoluteUrl('/home.jpg')], card: 'summary_large_image' }
+  };
 }

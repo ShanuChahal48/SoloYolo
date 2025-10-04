@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { orgJsonLd, websiteJsonLd, siteDefaults, absoluteUrl } from '@/lib/seo';
 import { Inter } from 'next/font/google';
 import "./globals.css";
 import Header from "../components/Header";
@@ -15,15 +16,77 @@ const inter = Inter({
 
 // Removed unused Playfair_Display font to eliminate lint warning.
 
+const { name: SITE_NAME, description: SITE_DESC } = siteDefaults();
+
 export const metadata: Metadata = {
-  title: "Solo YoloS - Offbeat Journeys for the Modern Explorer",
-  description: "Curated travel experiences to unconventional destinations. Join a community of passionate travelers.",
+  title: {
+    default: `${SITE_NAME} – Offbeat Journeys for the Modern Explorer`,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESC,
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: `${SITE_NAME} – Curated Offbeat Travel Experiences`,
+    description: SITE_DESC,
+    url: '/',
+    siteName: SITE_NAME,
+    images: [
+      {
+        url: absoluteUrl('/home.jpg'),
+        width: 1200,
+        height: 630,
+        alt: `${SITE_NAME} hero image`,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} – Offbeat Journeys`,
+    description: SITE_DESC,
+    images: [absoluteUrl('/home.jpg')],
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/favicon.ico',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 // (Removed global dynamic/no-cache overrides to restore ISR & static optimization.)
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // Preload footer data once so each page render doesn't refetch it separately.
   const footerData = await getFooterSettings();
+  // Use a single JSON-LD object with @graph instead of an array to avoid runtime parsers
+  // that expect an object (was causing r["@context"].toLowerCase error when script content was an array)
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      orgJsonLd(),
+      websiteJsonLd(),
+    ]
+  } as const;
   return (
     <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth">
       <body
@@ -38,6 +101,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       >
         <Header />
         <ScrollRevealProvider />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
         <main>{children}</main>
         <Footer data={footerData} />
         <WhatsAppChatButton />

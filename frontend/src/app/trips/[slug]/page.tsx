@@ -1,6 +1,8 @@
 
 // Ensure getTripBySlug is exported from '@/lib/api'
 import { getTripBySlug } from '@/lib/api';
+import type { Metadata } from 'next';
+import { excerpt, absoluteUrl, siteDefaults } from '@/lib/seo';
 import { } from '@/types';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
@@ -269,4 +271,26 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
       />
   </main>
   );
+}
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const trip = await getTripBySlug(params.slug);
+  if (!trip) return { title: 'Trip Not Found', description: 'Requested trip does not exist.' };
+  let raw: TripAttributes;
+  if (hasAttributes(trip as TripEntity)) {
+    raw = (trip as { attributes: TripAttributes }).attributes;
+  } else {
+    raw = trip as TripAttributes;
+  }
+  const { name: SITE_NAME } = siteDefaults();
+  const title = raw.title ? `${raw.title} | ${SITE_NAME}` : `Trip | ${SITE_NAME}`;
+  const desc = excerpt(raw.itinerary && typeof raw.itinerary === 'string' ? raw.itinerary : '', 160) || 'Adventure travel experience.';
+  const canonical = `/trips/${params.slug}`;
+  return {
+    title,
+    description: desc,
+    alternates: { canonical },
+    openGraph: { title, description: desc, url: canonical, images: [{ url: absoluteUrl('/home.jpg'), width: 1200, height: 630 }] },
+    twitter: { title, description: desc, images: [absoluteUrl('/home.jpg')], card: 'summary_large_image' }
+  };
 }
