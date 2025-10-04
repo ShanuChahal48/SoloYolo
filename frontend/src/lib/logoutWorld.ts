@@ -66,7 +66,9 @@ export async function validateExternalUrlHead(url: string, timeoutMs = 5000): Pr
   try {
     const controller = new AbortController();
     const t = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch(url, { method: 'HEAD', signal: controller.signal, cache: 'no-store' });
+  // Use a tiny revalidate window so validation doesn't mark the entire page as fully dynamic on every request.
+  // External HEAD responses are fine to cache briefly; we only need to know link existence.
+  const res = await fetch(url, { method: 'HEAD', signal: controller.signal, next: { revalidate: 300 } });
     clearTimeout(t);
     return { ok: res.ok, status: res.status };
   } catch {

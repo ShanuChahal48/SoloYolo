@@ -1,24 +1,11 @@
-import { fetchApi } from '@/lib/api';
+import { getTrips } from '@/lib/api';
 import { Trip } from '../../types/index';
 import TripCard from '../../components/TripCard';
 import Image from 'next/image';
 
-async function getTrips() {
-  const query = {
-    populate: ['featured_image'],
-    sort: ['createdAt:desc'],
-  };
-  const res = await fetchApi('/trips', query);
-  
-  if (!res?.data) {
-    return [];
-  }
-  
-  return res.data as Trip[];
-}
 
 export default async function TripsPage() {
-  const trips = await getTrips();
+  const trips: Trip[] = await getTrips();
 
   return (
     <main
@@ -98,7 +85,7 @@ export default async function TripsPage() {
             Events &amp; Trip
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {trips.filter(trip => trip.is_featured).map((trip, index) => (
+            {trips.filter((trip: Trip) => trip.is_featured).map((trip: Trip, index: number) => (
               <div 
                 key={trip.id} 
                 className="animate-fade-in-up flex"
@@ -117,9 +104,9 @@ export default async function TripsPage() {
       {/* Upcoming Trips section below forest image */}
       <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-20">
   <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-100 mb-6 sm:mb-8 text-center">Upcoming Trips</h2>
-        {trips.filter(trip => !trip.is_featured).length > 0 ? (
+  {trips.filter((trip: Trip) => !trip.is_featured).length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {trips.filter(trip => !trip.is_featured).map((trip, index) => (
+            {trips.filter((trip: Trip) => !trip.is_featured).map((trip: Trip, index: number) => (
               <div 
                 key={trip.id} 
                 className="animate-fade-in-up flex"

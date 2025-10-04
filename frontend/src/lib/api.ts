@@ -6,17 +6,29 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 /**
  * A utility function to make API requests to Strapi.
  */
-export async function fetchApi(endpoint: string, query?: Record<string, unknown>, options?: RequestInit & { next?: { revalidate?: number | false } }) {
-    const isNoStore = options?.cache === 'no-store';
-    // Only attach revalidate when NOT explicitly no-store to avoid Next.js warning.
+export async function fetchApi(
+    endpoint: string,
+    query?: Record<string, unknown>,
+    options?: RequestInit & { next?: { revalidate?: number | false }; cacheStrategy?: 'no-store' | 'short' | 'standard' | 'long' }
+) {
+    // Strategy mapping: tweak these durations as desired
+    const strategy = options?.cacheStrategy || 'standard';
+    const strategyMap: Record<string, { cache?: RequestCache; next?: { revalidate: number } }> = {
+        'no-store': { cache: 'no-store' },         // always fresh
+        'short':    { next: { revalidate: 30 } },  // 30s
+        'standard': { next: { revalidate: 120 } }, // 2 min
+        'long':     { next: { revalidate: 600 } }, // 10 min
+    };
+    const chosen = strategyMap[strategy] || strategyMap['standard'];
     const base: RequestInit & { next?: { revalidate?: number | false } } = {
         headers: { 'Content-Type': 'application/json' },
-        ...(isNoStore ? { cache: 'no-store' } : { next: { revalidate: 60 } })
+        ...(chosen.cache ? { cache: chosen.cache } : {}),
+        ...(chosen.next ? { next: chosen.next } : {})
     };
     const mergedOptions: RequestInit & { next?: { revalidate?: number | false } } = {
         ...base,
         ...options,
-        next: options?.next ?? base.next,
+        next: options?.next || base.next,
         headers: { ...(base.headers || {}), ...(options?.headers || {}) }
     };
     
@@ -48,7 +60,7 @@ export async function getTrips() {
         populate: ['featured_image'],
         sort: ['publishedAt:desc'],
     } as const;
-    const res = await fetchApi('/trips', query);
+    const res = await fetchApi('/trips', query, { cacheStrategy: 'long' });
     if (!res?.data) {
         return [];
     }
@@ -67,7 +79,7 @@ export async function getTripBySlug(slug: string) {
             gallery: true
         }, 
     } as const;
-    const res = await fetchApi('/trips', query);
+    const res = await fetchApi('/trips', query, { cacheStrategy: 'standard' });
 
     if (!res?.data || res.data.length === 0) {
         return null;
@@ -90,7 +102,7 @@ export async function getAboutPage() {
             },
         },
     } as const;
-    const res = await fetchApi('/about-page', query);
+    const res = await fetchApi('/about-page', query, { cacheStrategy: 'long' });
     return res?.data || null;
 }
 
@@ -102,7 +114,7 @@ export async function getContactPage() {
     const query = {
         populate: '*',
     } as const;
-    const res = await fetchApi('/contact-page', query);
+    const res = await fetchApi('/contact-page', query, { cacheStrategy: 'long' });
     return res?.data || null;
 }
 
@@ -121,7 +133,7 @@ export async function getBlogPosts() {
         },
         sort: ['publishedAt:desc'],
     } as const;
-    const res = await fetchApi('/blog-posts', query);
+    const res = await fetchApi('/blog-posts', query, { cacheStrategy: 'long' });
     const items = res?.data || [];
     // Normalize flattened shape (production) to Strapi default attributes shape expected by UI
     interface RawMedia { id?: number; formats?: unknown; url?: string; [k: string]: unknown }
@@ -258,7 +270,7 @@ export async function getTestimonials() {
             }
         },
     } as const;
-    const res = await fetchApi('/testimonials', query);
+    const res = await fetchApi('/testimonials', query, { cacheStrategy: 'short' });
     return res?.data || [];
 }
 
@@ -275,14 +287,14 @@ export async function getFeaturedTrips() {
 // --- New: Single types for dynamic site chrome ---
 export async function getHomePage() {
     const query = { populate: { hero_media: true, trip_badges: true, events_background: true } } as const;
-    const res = await fetchApi('/home-page', query);
+    const res = await fetchApi('/home-page', query, { cacheStrategy: 'standard' });
     return res?.data || null;
 }
 
 export async function getFooterSettings() {
     const query = { populate: { background_image: true } } as const;
     // Use ISR (5 minutes) instead of no-store to allow static rendering
-    const res = await fetchApi('/footer', query, { next: { revalidate: 300 } });
+    const res = await fetchApi('/footer', query, { cacheStrategy: 'long' });
     const data = res?.data || null;
     if (!data) {
         return {
@@ -301,6 +313,6 @@ export async function getFooterSettings() {
 // Placeholder: community page single type if/when added
 export async function getCommunityPage() {
     const query = { populate: '*' } as const;
-    const res = await fetchApi('/community-page', query);
+    const res = await fetchApi('/community-page', query, { cacheStrategy: 'standard' });
     return res?.data || null;
 }

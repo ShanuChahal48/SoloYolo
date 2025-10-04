@@ -9,6 +9,9 @@ import { BlogPost, TestimonialItem } from '@/types';
 
 interface TripBadge { label: string }
 
+// Incremental Static Regeneration: rebuild homepage at most every 120s
+export const revalidate = 120;
+
 export default async function HomePage() {
   // Fetch all necessary data in parallel for maximum efficiency
   const [testimonials, blogPosts, homePage] = await Promise.all([
