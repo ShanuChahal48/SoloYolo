@@ -129,7 +129,7 @@ export default async function AboutPage() {
       </section>
 
       {/* Main Content Section */}
-      <section className="py-20">
+  <section className="pt-20 pb-12">
         <div className="container mx-auto px-6 max-w-4xl">
           <div className="animate-fade-in-up">
             <article
@@ -148,27 +148,27 @@ export default async function AboutPage() {
 
       {/* Team Section */}
       {team_members && team_members.length > 0 && (
-        <section className="relative mt-12 md:mt-16 pt-28 md:pt-32 pb-32 overflow-hidden">
+  <section className="relative mt-0 pt-8 md:pt-10 pb-20 overflow-hidden">
           {/* Subtle decorative gradients repositioned */}
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute top-[-140px] right-[-180px] w-[540px] h-[540px] bg-gradient-to-br from-teal-500/10 to-transparent rounded-full" />
               <div className="absolute bottom-[-180px] left-[-200px] w-[480px] h-[480px] bg-gradient-to-tr from-amber-500/10 to-transparent rounded-full" />
             </div>
           <div className="relative z-10 max-w-7xl mx-auto px-6 flex flex-col items-center">
-            <div className="w-full text-center mb-24 animate-fade-in-up">
+            <div className="w-full text-center mb-14 animate-fade-in-up">
               <h2 className="text-5xl font-bold text-white mb-7 tracking-tight leading-tight">{team_section_title}</h2>
               <p className="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
                 Meet the passionate individuals who make our adventures possible.
               </p>
             </div>
-            <div className="flex flex-wrap justify-center gap-x-20 gap-y-16 w-full px-2">
+            <div className="flex flex-wrap justify-center gap-x-16 gap-y-12 w-full px-2">
               {team_members.map((member: TeamMember, index: number) => (
                 <div
                   key={member.id}
-                  className="flex flex-col items-center w-[320px] max-w-sm text-center bg-slate-900/40 backdrop-blur-sm p-12 rounded-3xl shadow-[0_8px_30px_-10px_rgba(0,0,0,0.6)] hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.7)] transition-all duration-300 hover:-translate-y-1 animate-fade-in-up border border-white/5"
+                  className="flex flex-col items-center w-[300px] max-w-sm text-center bg-slate-900/40 backdrop-blur-sm p-10 rounded-2xl shadow-[0_6px_22px_-8px_rgba(0,0,0,0.55)] hover:shadow-[0_10px_30px_-6px_rgba(0,0,0,0.6)] transition-all duration-300 hover:-translate-y-1 animate-fade-in-up border border-white/5"
                   style={{ animationDelay: `${index * 0.12}s` }}
                 >
-                  <div className="relative w-44 h-44 mx-auto mb-8">
+                  <div className="relative w-40 h-40 mx-auto mb-6">
                     {(() => {
                       const photo = member.photo?.data || member.photo;
                       const imgUrl = getImageUrl(photo, 'thumbnail');
