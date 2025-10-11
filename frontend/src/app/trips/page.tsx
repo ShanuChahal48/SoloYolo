@@ -28,12 +28,12 @@ export default async function TripsPage({ searchParams }: { searchParams?: Recor
   const toDate = to ? new Date(to) : null;
   const needle = destination?.toLowerCase() || '';
 
-  const filteredTrips: Trip[] = (trips as any[]).filter((t: any) => {
+  const filteredTrips: Trip[] = (trips as Trip[]).filter((t: Trip) => {
     let ok = true;
-    const title = (t?.title || '').toString().toLowerCase();
-    const dest = (t?.destination || '').toString().toLowerCase();
-    const cap = typeof t?.capacity === 'number' ? t.capacity : undefined;
-    const sDate = t?.start_date ? new Date(t.start_date) : null;
+    const title = (t.title || '').toString().toLowerCase();
+    const dest = (t.destination || '').toString().toLowerCase();
+    const cap = typeof t.capacity === 'number' ? t.capacity : undefined;
+    const sDate = t.start_date ? new Date(t.start_date) : null;
 
     if (hasDateFilters) {
       if (!sDate || Number.isNaN(sDate.getTime())) return false;

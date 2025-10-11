@@ -38,7 +38,7 @@ function enhanceContent(markdown: string): string {
   const raw = marked.parse(markdown || '');
   const rawHtml = typeof raw === 'string' ? raw : '';
   // Replace images that have inline float styles (especially float:right) with responsive class-based styling
-  const transformed = rawHtml.replace(/<img([^>]*?)style=\"[^\"]*float:\s*right;?[^\"]*\"([^>]*?)>/gi, (match: string, preAttrs: string, postAttrs: string) => {
+  const transformed = rawHtml.replace(/<img([^>]*?)style=\"[^\"]*float:\s*right;?[^\"]*\"([^>]*?)>/gi, (match: string) => {
     const srcMatch = match.match(/src=\"([^\"]+)\"/i);
     const altMatch = match.match(/alt=\"([^\"]*)\"/i);
     const src = srcMatch ? srcMatch[1] : '';

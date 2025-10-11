@@ -285,13 +285,20 @@ export async function getFeaturedTrips() {
 // Deprecated: media URL helper moved to '@/lib/media'
 
 // Server-side filtered trips search for listing page
+type StrapiFilter = Record<string, unknown>;
+type StrapiQuery = {
+    populate?: (string | Record<string, unknown>)[] | Record<string, unknown>;
+    sort?: string[];
+    filters?: Record<string, unknown>;
+};
+
 export async function searchTrips(params: { destination?: string; from?: string; to?: string; guests?: number }) {
     const { destination, from, to, guests } = params || {};
 
     // Build a primary query using optimistic field names that may exist in Strapi.
     // If Strapi returns 400 due to unknown fields, we'll fall back to a minimal, safe query.
-    const andConditions: any[] = [];
-    const destinationOr: any[] = [];
+    const andConditions: StrapiFilter[] = [];
+    const destinationOr: StrapiFilter[] = [];
 
     if (destination) {
         // Destination OR title contains — wrapped later inside $and so that
@@ -302,7 +309,7 @@ export async function searchTrips(params: { destination?: string; from?: string;
 
     if (from || to) {
         // Date range is mandatory when provided.
-        const dateCond: any = {};
+        const dateCond: Record<string, string> = {};
         if (from) dateCond.$gte = from;
         if (to) dateCond.$lte = to;
         andConditions.push({ start_date: dateCond });
@@ -313,9 +320,9 @@ export async function searchTrips(params: { destination?: string; from?: string;
         andConditions.push({ capacity: { $gte: guests } });
     }
 
-    const baseQuery: any = { populate: ['featured_image'], sort: ['createdAt:desc'] };
+    const baseQuery: StrapiQuery = { populate: ['featured_image'], sort: ['createdAt:desc'] };
 
-    const primaryQuery: any = { ...baseQuery };
+    const primaryQuery: StrapiQuery = { ...baseQuery };
     // Compose filters: if date/guests exist, they go into $and; if destination exists,
     // add its $or group into the $and as well. If only destination exists (no date/guests),
     // then use $or by itself.
@@ -336,9 +343,9 @@ export async function searchTrips(params: { destination?: string; from?: string;
 
     // Fallback: only filter by title contains to avoid 400s from unknown fields
     // Still enforce date range if available; use title contains for keyword.
-    const fallbackAnd: any[] = [];
+    const fallbackAnd: StrapiFilter[] = [];
     if (from || to) {
-        const dateCond: any = {};
+        const dateCond: Record<string, string> = {};
         if (from) dateCond.$gte = from;
         if (to) dateCond.$lte = to;
         fallbackAnd.push({ start_date: dateCond });
@@ -347,7 +354,7 @@ export async function searchTrips(params: { destination?: string; from?: string;
         // Enforce AND when date exists; otherwise just keyword.
         fallbackAnd.push({ $or: [{ title: { $containsi: destination } }] });
     }
-    const fallbackQuery: any = { ...baseQuery };
+    const fallbackQuery: StrapiQuery = { ...baseQuery };
     if (fallbackAnd.length > 0) {
         if ((from || to) && destination) {
             fallbackQuery.filters = { $and: fallbackAnd };
