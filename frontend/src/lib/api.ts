@@ -9,7 +9,7 @@ const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337'
 export async function fetchApi(
     endpoint: string,
     query?: Record<string, unknown>,
-    options?: RequestInit & { next?: { revalidate?: number | false }; cacheStrategy?: 'no-store' | 'short' | 'standard' | 'long' }
+    options?: RequestInit & { next?: { revalidate?: number | false }; cacheStrategy?: 'no-store' | 'short' | 'standard' | 'long'; suppressErrorLog?: boolean }
 ) {
     // Strategy mapping: tweak these durations as desired
     const strategy = options?.cacheStrategy || 'standard';
@@ -39,7 +39,7 @@ export async function fetchApi(
         const response = await fetch(requestUrl, mergedOptions);
         if (!response.ok) {
             // Gracefully silence 403 for optional single types (e.g., footer) while still surfacing other issues.
-            if (response.status !== 403) {
+            if (response.status !== 403 && !options?.suppressErrorLog) {
                 console.error(`Error fetching ${requestUrl}: ${response.status} ${response.statusText}`);
             }
             return null;
@@ -283,6 +283,84 @@ export async function getFeaturedTrips() {
     return res?.data || [];
 }
 // Deprecated: media URL helper moved to '@/lib/media'
+
+// Server-side filtered trips search for listing page
+export async function searchTrips(params: { destination?: string; from?: string; to?: string; guests?: number }) {
+    const { destination, from, to, guests } = params || {};
+
+    // Build a primary query using optimistic field names that may exist in Strapi.
+    // If Strapi returns 400 due to unknown fields, we'll fall back to a minimal, safe query.
+    const andConditions: any[] = [];
+    const destinationOr: any[] = [];
+
+    if (destination) {
+        // Destination OR title contains — wrapped later inside $and so that
+        // date range (if provided) is mandatory.
+        destinationOr.push({ destination: { $containsi: destination } });
+        destinationOr.push({ title: { $containsi: destination } });
+    }
+
+    if (from || to) {
+        // Date range is mandatory when provided.
+        const dateCond: any = {};
+        if (from) dateCond.$gte = from;
+        if (to) dateCond.$lte = to;
+        andConditions.push({ start_date: dateCond });
+    }
+
+    if (typeof guests === 'number' && !Number.isNaN(guests)) {
+        // Capacity is also treated as an AND condition if provided.
+        andConditions.push({ capacity: { $gte: guests } });
+    }
+
+    const baseQuery: any = { populate: ['featured_image'], sort: ['createdAt:desc'] };
+
+    const primaryQuery: any = { ...baseQuery };
+    // Compose filters: if date/guests exist, they go into $and; if destination exists,
+    // add its $or group into the $and as well. If only destination exists (no date/guests),
+    // then use $or by itself.
+    if (andConditions.length > 0 || destinationOr.length > 0) {
+        // If both date/guests AND destination are present, enforce $and between them.
+        if (andConditions.length > 0 && destinationOr.length > 0) {
+            primaryQuery.filters = { $and: [...andConditions, { $or: destinationOr }] };
+        } else if (andConditions.length > 0) {
+            primaryQuery.filters = { $and: [...andConditions] };
+        } else if (destinationOr.length > 0) {
+            primaryQuery.filters = { $or: destinationOr };
+        }
+    }
+
+    // Attempt the primary (richer) query first.
+    let res = await fetchApi('/trips', primaryQuery, { suppressErrorLog: true });
+    if (res?.data) return res.data;
+
+    // Fallback: only filter by title contains to avoid 400s from unknown fields
+    // Still enforce date range if available; use title contains for keyword.
+    const fallbackAnd: any[] = [];
+    if (from || to) {
+        const dateCond: any = {};
+        if (from) dateCond.$gte = from;
+        if (to) dateCond.$lte = to;
+        fallbackAnd.push({ start_date: dateCond });
+    }
+    if (destination) {
+        // Enforce AND when date exists; otherwise just keyword.
+        fallbackAnd.push({ $or: [{ title: { $containsi: destination } }] });
+    }
+    const fallbackQuery: any = { ...baseQuery };
+    if (fallbackAnd.length > 0) {
+        if ((from || to) && destination) {
+            fallbackQuery.filters = { $and: fallbackAnd };
+        } else if (from || to) {
+            fallbackQuery.filters = { $and: fallbackAnd };
+        } else if (destination) {
+            fallbackQuery.filters = { $or: [{ title: { $containsi: destination } }] };
+        }
+    }
+
+    res = await fetchApi('/trips', fallbackQuery);
+    return res?.data || [];
+}
 
 // --- New: Single types for dynamic site chrome ---
 export async function getHomePage() {

@@ -712,7 +712,7 @@ export interface ApiTripTrip extends Struct.CollectionTypeSchema {
     draftAndPublish: true;
   };
   attributes: {
-    booking_url: Schema.Attribute.String & Schema.Attribute.Configurable;
+    booking_url: Schema.Attribute.String;
     booking_url_verified: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
     category: Schema.Attribute.Enumeration<['India', 'International']>;
@@ -741,6 +741,7 @@ export interface ApiTripTrip extends Struct.CollectionTypeSchema {
     price: Schema.Attribute.Decimal & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;
+    start_date: Schema.Attribute.Date;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

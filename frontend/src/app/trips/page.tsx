@@ -1,13 +1,53 @@
-import { getTrips } from '@/lib/api';
+import { getTrips, searchTrips } from '@/lib/api';
 import type { Metadata } from 'next';
 import { siteDefaults, absoluteUrl } from '@/lib/seo';
 import { Trip } from '../../types/index';
 import TripCard from '../../components/TripCard';
+import FilterChips from '../../components/FilterChips';
 import Image from 'next/image';
+import HeroSearch from '@/components/HeroSearch';
 
 
-export default async function TripsPage() {
-  const trips: Trip[] = await getTrips();
+export default async function TripsPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
+  const params = searchParams || {};
+  const destination = typeof params.destination === 'string' ? params.destination : undefined;
+  const from = typeof params.from === 'string' ? params.from : undefined;
+  const to = typeof params.to === 'string' ? params.to : undefined;
+  const guests = typeof params.guests === 'string' ? parseInt(params.guests, 10) : undefined;
+
+  const hasFilters = Boolean(destination || from || to || guests);
+  const trips: Trip[] = hasFilters
+    ? await searchTrips({ destination, from, to, guests })
+    : await getTrips();
+
+  // Client-side guard to enforce AND logic for date range and destination
+  const hasDateFilters = Boolean(from || to);
+  const hasDestination = Boolean(destination);
+  const hasGuests = typeof guests === 'number' && !Number.isNaN(guests);
+  const fromDate = from ? new Date(from) : null;
+  const toDate = to ? new Date(to) : null;
+  const needle = destination?.toLowerCase() || '';
+
+  const filteredTrips: Trip[] = (trips as any[]).filter((t: any) => {
+    let ok = true;
+    const title = (t?.title || '').toString().toLowerCase();
+    const dest = (t?.destination || '').toString().toLowerCase();
+    const cap = typeof t?.capacity === 'number' ? t.capacity : undefined;
+    const sDate = t?.start_date ? new Date(t.start_date) : null;
+
+    if (hasDateFilters) {
+      if (!sDate || Number.isNaN(sDate.getTime())) return false;
+      if (fromDate && sDate < fromDate) ok = false;
+      if (toDate && sDate > toDate) ok = false;
+    }
+    if (hasDestination) {
+      if (!(title.includes(needle) || dest.includes(needle))) ok = false;
+    }
+    if (hasGuests && typeof cap === 'number') {
+      if (cap < (guests as number)) ok = false;
+    }
+    return ok;
+  });
 
   return (
     <main
@@ -50,6 +90,13 @@ export default async function TripsPage() {
           </div>
         </div>
 
+        {/* Anchored search near the bottom of the trips hero */}
+        <div className="absolute left-0 right-0 bottom-24 sm:bottom-28 md:bottom-32 lg:bottom-36 z-30 px-4">
+          <div className="max-w-6xl mx-auto">
+            <HeroSearch />
+          </div>
+        </div>
+
         {/* Mountain divider like homepage */}
         <div className="absolute left-0 right-0 bottom-0 w-full overflow-visible pointer-events-none" style={{lineHeight:0}}>
           <Image
@@ -63,8 +110,10 @@ export default async function TripsPage() {
         </div>
       </div>
       
-      {/* Gap between header image and waterfall1 section */}
-  <div className="w-full" style={{ height: '40px' }}></div>
+    {/* Gap between header image and filters */}
+    <div className="w-full" style={{ height: '24px' }}></div>
+    <FilterChips resultsCount={filteredTrips.length} />
+    <div className="w-full" style={{ height: '16px' }}></div>
 
       {/* Featured (Events & Trip) section on top of waterfall image */}
       <div className="relative w-full pb-12">
@@ -87,7 +136,7 @@ export default async function TripsPage() {
             Events &amp; Trip
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {trips.filter((trip: Trip) => trip.is_featured).map((trip: Trip, index: number) => (
+            {filteredTrips.filter((trip: Trip) => trip.is_featured).map((trip: Trip, index: number) => (
               <div 
                 key={trip.id} 
                 className="animate-fade-in-up flex"
@@ -106,9 +155,9 @@ export default async function TripsPage() {
       {/* Upcoming Trips section below forest image */}
       <div className="container mx-auto px-2 sm:px-4 py-12 sm:py-20">
   <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-slate-100 mb-6 sm:mb-8 text-center">Upcoming Trips</h2>
-  {trips.filter((trip: Trip) => !trip.is_featured).length > 0 ? (
+  {filteredTrips.filter((trip: Trip) => !trip.is_featured).length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {trips.filter((trip: Trip) => !trip.is_featured).map((trip: Trip, index: number) => (
+            {filteredTrips.filter((trip: Trip) => !trip.is_featured).map((trip: Trip, index: number) => (
               <div 
                 key={trip.id} 
                 className="animate-fade-in-up flex"
@@ -140,10 +189,8 @@ export default async function TripsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-slate-100 mb-4">Adventures Coming Soon</h2>
-              <p className="text-slate-300 leading-relaxed">
-                We&apos;re crafting amazing new experiences for you. Check back soon for incredible journeys that await!
-              </p>
+              <h2 className="text-2xl font-semibold text-slate-100 mb-4">No trips match your filters</h2>
+              <p className="text-slate-300 leading-relaxed">Try adjusting destination, dates, or guests to see more options.</p>
             </div>
           </div>
         )}

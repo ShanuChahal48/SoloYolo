@@ -67,8 +67,7 @@
     },
     "booking_url": {
       "type": "string",
-      "required": false,
-      "configurable": true
+      "required": false
     },
     "booking_url_verified": {
       "type": "boolean",
@@ -76,8 +75,12 @@
     },
     "experience_highlights": {
       "type": "component",
-      "repeatable": true,
-      "component": "shared.experience-highlight"
+      "component": "shared.experience-highlight",
+      "repeatable": true
+    },
+    "start_date": {
+      "type": "date",
+      "required": false
     }
   }
 }

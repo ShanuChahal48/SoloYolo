@@ -57,6 +57,9 @@ export interface Trip {
     price: number;
     duration: string;
     category: 'India' | 'International';
+  destination?: string; // optional destination/location
+  start_date?: string; // ISO date string for trip start
+  capacity?: number; // max guests (optional)
     is_featured?: boolean;
     featured_image?: {
         url?: string;

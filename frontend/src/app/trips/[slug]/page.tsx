@@ -27,6 +27,7 @@ interface TripAttributes {
   title: string;
   price: number;
   duration: string;
+  start_date?: string;
   category?: string;
   itinerary?: ItineraryValue;
   featured_image?: StrapiMedia;
@@ -59,7 +60,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     ? (trip as { attributes: TripAttributes }).attributes
     : (trip as TripAttributes);
 
-  const { title, price, duration, category, itinerary, featured_image, gallery, slug: internalTripSlug, booking_url, booking_url_verified, experience_highlights } = rawAttributes;
+  const { title, price, duration, start_date, category, itinerary, featured_image, gallery, slug: internalTripSlug, booking_url, booking_url_verified, experience_highlights } = rawAttributes;
 
   // Prefer confirmed booking URL if verified
   const confirmedBookingUrl: string | undefined = booking_url || undefined;
@@ -193,6 +194,19 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
               </div>
               
               <div className="space-y-6 mb-8">
+                {start_date && (
+                  <div className="flex items-center p-4 bg-sky-50 rounded-xl">
+                    <div className="p-3 bg-sky-100 rounded-full mr-4">
+                      <svg className="w-6 h-6 text-sky-600" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M7 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 112 0v1zm13 6H4v10h16V8zM6 10h4v3H6v-3z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-800">Start date</p>
+                      <p className="text-gray-600">{new Date(start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center p-4 bg-teal-50 rounded-xl">
                   <div className="p-3 bg-teal-100 rounded-full mr-4">
                     <svg className="w-6 h-6 text-teal-600" fill="currentColor" viewBox="0 0 24 24">
@@ -254,6 +268,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
             '@type': 'Trip',
             name: title,
             description: `${title} – ${category || 'Travel Experience'}`,
+                startDate: start_date ? new Date(start_date).toISOString() : undefined,
             offers: {
               '@type': 'Offer',
               price: typeof price === 'number' ? price : undefined,

@@ -64,6 +64,12 @@ export default function TripCard({ trip }: TripCardProps) {
         <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm text-cyan-200 py-1 px-3 rounded-full font-medium text-sm">
           {category}
         </div>
+        {/* Start Date (if available) */}
+        {trip.start_date && (
+          <div className="absolute bottom-4 left-4 bg-white/90 text-slate-900 py-1 px-3 rounded-full font-semibold text-xs shadow">
+            {new Date(trip.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </div>
+        )}
       </div>
       
       <div className="p-6">

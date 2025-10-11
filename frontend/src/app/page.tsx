@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { excerpt, absoluteUrl, siteDefaults } from '@/lib/seo';
 import { getMediaUrl } from '@/lib/media';
 import FeaturedTrips from '@/components/FeaturedTrips';
+import HeroSearch from '@/components/HeroSearch';
 import TestimonialCard from '@/components/TestimonialCard';
 import BlogCard from '@/components/BlogCard';
 import { BlogPost, TestimonialItem } from '@/types';
@@ -72,7 +73,7 @@ export default async function HomePage() {
           const media = attrs?.hero_media?.data || attrs?.hero_media; // strapi might wrap
           const mediaUrl = getMediaUrl(media);
           if (mediaUrl) {
-            const isVideo = mediaUrl.match(/\.(mp4|webm|mov)$/i);
+            const isVideo = /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(mediaUrl);
             return isVideo ? (
               <video
                 key={mediaUrl}
@@ -81,6 +82,7 @@ export default async function HomePage() {
                 loop
                 muted
                 playsInline
+                preload="auto"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             ) : (
@@ -95,14 +97,15 @@ export default async function HomePage() {
               />
             );
           }
-          // fallback existing local video
+          // Fallback to local video when CMS has no media
           return (
             <video
-              src="/travelVideo.mp4"
+              src="/SoloWoloWebsite.m4v"
               autoPlay
               loop
               muted
               playsInline
+              preload="auto"
               className="absolute inset-0 w-full h-full object-cover"
             />
           );
@@ -148,12 +151,20 @@ export default async function HomePage() {
                 Learn More
               </Link>
             </div>
+            {/* Search is now anchored near the bottom via absolute container below */}
           </div>
         </div>
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 animate-bounce">
           <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
+          </div>
+        </div>
+
+        {/* Anchored search near the bottom of hero */}
+        <div className="absolute left-0 right-0 bottom-24 sm:bottom-28 md:bottom-32 lg:bottom-36 z-30 px-4">
+          <div className="max-w-6xl mx-auto" data-reveal="fade-up" data-reveal-delay="280">
+            <HeroSearch />
           </div>
         </div>
           {/* Tree Divider Overlapping Bottom of Hero Image */}
