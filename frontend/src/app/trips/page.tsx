@@ -8,8 +8,8 @@ import Image from 'next/image';
 import HeroSearch from '@/components/HeroSearch';
 
 
-export default async function TripsPage({ searchParams }: { searchParams?: Record<string, string | string[] | undefined> }) {
-  const params = searchParams || {};
+export default async function TripsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
   const destination = typeof params.destination === 'string' ? params.destination : undefined;
   const from = typeof params.from === 'string' ? params.from : undefined;
   const to = typeof params.to === 'string' ? params.to : undefined;
@@ -74,8 +74,8 @@ export default async function TripsPage({ searchParams }: { searchParams?: Recor
         />
         {/* Soft gradient for legibility without dulling image */}
         <div className="absolute inset-0" style={{background:'linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.35) 40%, rgba(0,0,0,0.65) 100%)'}} aria-hidden="true" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4 sm:px-6">
-          <div className="max-w-5xl mx-auto">
+        <div className="absolute inset-0 flex flex-col items-start md:items-center justify-start md:justify-center text-center px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto pt-24 sm:pt-28 md:pt-0">
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-4 text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.7)]">
               All Our Expeditions
             </h1>
@@ -91,7 +91,7 @@ export default async function TripsPage({ searchParams }: { searchParams?: Recor
         </div>
 
         {/* Anchored search near the bottom of the trips hero */}
-        <div className="absolute left-0 right-0 bottom-24 sm:bottom-28 md:bottom-32 lg:bottom-36 z-30 px-4">
+        <div className="absolute left-0 right-0 bottom-20 sm:bottom-24 md:bottom-28 lg:bottom-32 z-30 px-4">
           <div className="max-w-6xl mx-auto">
             <HeroSearch />
           </div>

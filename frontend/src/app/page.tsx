@@ -65,7 +65,7 @@ export default async function HomePage() {
       }}
     >
       {/* --- Hero Section --- */}
-      <section className="relative h-screen flex items-center justify-center text-white text-center overflow-hidden">
+  <section className="relative h-screen flex items-start md:items-center justify-center text-white text-center overflow-hidden">
         {/* Subtle Background Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-black/40 via-black/25 to-black/50 z-10" />
         {(() => {
@@ -114,7 +114,7 @@ export default async function HomePage() {
         <div className="absolute top-20 left-10 w-20 h-20 bg-white/10 rounded-full animate-float z-20"></div>
         <div className="absolute top-40 right-20 w-16 h-16 bg-amber-400/20 rounded-full animate-float z-20" style={{animationDelay: '1s'}}></div>
         <div className="absolute bottom-40 left-20 w-12 h-12 bg-teal-400/20 rounded-full animate-float z-20" style={{animationDelay: '2s'}}></div>
-        <div className="relative z-30 container mx-auto px-6 max-w-6xl" data-reveal-group>
+  <div className="relative z-30 container mx-auto px-6 max-w-6xl pt-24 sm:pt-28 md:pt-0" data-reveal-group>
           <div data-reveal="fade-up">
             <h1 className="text-responsive-3xl font-serif font-bold tracking-tight leading-tight mb-6 gradient-text" data-reveal="fade-up" data-reveal-delay="60">
               {(homePage?.attributes || homePage)?.hero_title || 'Travel Beyond The Ordinary'}
@@ -162,7 +162,7 @@ export default async function HomePage() {
         </div>
 
         {/* Anchored search near the bottom of hero */}
-        <div className="absolute left-0 right-0 bottom-24 sm:bottom-28 md:bottom-32 lg:bottom-36 z-30 px-4">
+        <div className="absolute left-0 right-0 bottom-20 sm:bottom-24 md:bottom-28 lg:bottom-32 z-30 px-4">
           <div className="max-w-6xl mx-auto" data-reveal="fade-up" data-reveal-delay="280">
             <HeroSearch />
           </div>

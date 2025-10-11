@@ -265,6 +265,7 @@ body {
 /* Text Utilities */
 .line-clamp-3 {
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -319,6 +320,66 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+}
+
+/* DayPicker custom styles to match reference UI */
+.rdp-book {
+  --rdp-accent: #2563eb; /* blue-600 */
+  --rdp-background-color: #eff6ff; /* blue-50 */
+}
+.rdp-book .rdp-months {
+  gap: 0;
+}
+.rdp-book .rdp-months .rdp-month:first-child {
+  padding-right: 12px;
+  margin-right: 12px;
+  border-right: 1px solid rgba(15, 23, 42, 0.08);
+}
+.rdp-book .rdp-months .rdp-month:last-child {
+  padding-left: 12px;
+}
+.rdp-book .rdp-nav {
+  top: 10px;
+}
+.rdp-book .rdp-nav .rdp-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  color: #0f172a; /* slate-900 */
+}
+.rdp-book .rdp-caption_label {
+  font-weight: 700;
+  color: #0f172a;
+}
+.rdp-book .rdp-head_cell {
+  color: #475569; /* slate-600 */
+  font-weight: 500;
+}
+.rdp-book .rdp-day {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+}
+.rdp-book .rdp-day:hover:not([disabled]) {
+  background: rgba(37, 99, 235, 0.08);
+}
+.rdp-book .rdp-day_selected,
+.rdp-book .rdp-day_selected:focus-visible,
+.rdp-book .rdp-day_selected:hover {
+  background: var(--rdp-accent);
+  color: white;
+}
+.rdp-book .rdp-day_range_start,
+.rdp-book .rdp-day_range_end {
+  background: var(--rdp-accent);
+  color: white;
+}
+.rdp-book .rdp-day_range_middle {
+  background: var(--rdp-background-color);
+  color: #0f172a;
+}
+.rdp-book .rdp-footer {
+  display: none; /* we provide our own Clear/Apply */
 }
 
 /* -------------------------------------------------- */
