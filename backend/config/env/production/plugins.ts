@@ -8,7 +8,12 @@ export default ({ env }) => ({
         api_secret: env('CLOUDINARY_SECRET'),
       },
       actionOptions: {
-        upload: {},
+        // Ensure Cloudinary stores and delivers PDFs as public upload resources.
+        upload: {
+          resource_type: 'auto',
+          type: 'upload',
+          access_mode: 'public',
+        },
         delete: {},
       },
     },

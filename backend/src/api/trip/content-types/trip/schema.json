@@ -81,6 +81,16 @@
     "start_date": {
       "type": "date",
       "required": false
+    },
+    "brochure_pdf": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos",
+        "audios"
+      ]
     }
   }
 }

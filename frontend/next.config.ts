@@ -24,6 +24,18 @@ const nextConfig: NextConfig = {
   },
   // Help Next.js know the monorepo root to avoid lockfile ambiguity warnings
   outputFileTracingRoot: path.join(__dirname, '..', '..'),
+  async rewrites() {
+    return [
+      {
+        source: '/trips/pdf.worker.mjs',
+        destination: 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs',
+      },
+      {
+        source: '/pdf.worker.mjs',
+        destination: 'https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

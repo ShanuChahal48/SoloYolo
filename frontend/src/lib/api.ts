@@ -1,4 +1,5 @@
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import qs from 'qs';
 
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
@@ -52,19 +53,52 @@ export async function fetchApi(
     }
 }
 
+// Normalize Strapi trip items to a flat shape used by the UI (for listings/search)
+function normalizeTrips(items: any[]): any[] {
+    if (!Array.isArray(items)) return items as any[];
+    return items.map((item) => {
+        if (item && typeof item === 'object' && 'attributes' in item && (item as any).attributes) {
+            const a = (item as any).attributes || {};
+            return {
+                id: (item as any).id,
+                documentId: (item as any).documentId,
+                title: a.title,
+                slug: a.slug,
+                excerpt: a.excerpt,
+                price: a.price,
+                duration: a.duration,
+                category: a.category,
+                destination: a.destination,
+                start_date: a.start_date,
+                capacity: a.capacity,
+                is_featured: a.is_featured,
+                featured_image: a.featured_image,
+                itinerary: a.itinerary,
+                gallery: a.gallery,
+            };
+        }
+        return item;
+    });
+}
+
 /**
  * Fetches all trips for the main listing page.
  */
 export async function getTrips() {
     const query = {
-        populate: ['featured_image'],
+        populate: ['featured_image', 'brochure_pdf'],
         sort: ['publishedAt:desc'],
     } as const;
     const res = await fetchApi('/trips', query, { cacheStrategy: 'long' });
     if (!res?.data) {
         return [];
     }
-    return res.data;
+    // If Strapi rejects unknown populate keys, retry without brochure_pdf
+    if (!res?.data) {
+        const safe = await fetchApi('/trips', { populate: ['featured_image'], sort: ['publishedAt:desc'] }, { cacheStrategy: 'long', suppressErrorLog: true });
+        return safe?.data ? normalizeTrips(safe.data) : [];
+    }
+    return normalizeTrips(res.data);
 }
 
 
@@ -72,20 +106,35 @@ export async function getTrips() {
  * Fetches a single trip by its slug.
  */
 export async function getTripBySlug(slug: string) {
-    const query = {
-        filters: { slug: { $eq: slug } },
-        populate: {
-            featured_image: true,
-            gallery: true
-        }, 
-    } as const;
-    const res = await fetchApi('/trips', query, { cacheStrategy: 'standard' });
+    // Try multiple populate strategies to avoid 400s from unknown fields
+    const populates: Array<Record<string, unknown> | string[] | string> = [
+        // Use only known fields to avoid 400s from unknown keys
+        { featured_image: true, gallery: true, brochure_pdf: true },
+        ['featured_image', 'gallery', 'brochure_pdf'],
+        '*',
+    ];
 
-    if (!res?.data || res.data.length === 0) {
+    const tryFetch = async (filters: Record<string, unknown>) => {
+        for (const p of populates) {
+            const res = await fetchApi('/trips', { filters, populate: p as any }, { cacheStrategy: 'standard', suppressErrorLog: true });
+            if (res?.data && res.data.length > 0) return res.data[0];
+        }
         return null;
-    }
+    };
 
-    return res.data[0];
+    // 1) by slug
+    const bySlug = await tryFetch({ slug: { $eq: slug } });
+    if (bySlug) return bySlug;
+    // 2) by documentId
+    const byDoc = await tryFetch({ documentId: { $eq: slug } });
+    if (byDoc) return byDoc;
+    // 3) by numeric id
+    const maybeId = Number(slug);
+    if (!Number.isNaN(maybeId)) {
+        const byId = await tryFetch({ id: { $eq: maybeId } });
+        if (byId) return byId;
+    }
+    return null;
 }
 // --- Page Content Functions ---
 
@@ -208,7 +257,7 @@ export async function getPostBySlug(slug: string) {
     const res = await fetchApi('/blog-posts', query);
     const raw = res?.data?.[0];
     if (!raw) return null;
-    if (raw.attributes) return raw; // already normalized
+    if (raw.attributes) return raw;
     interface RawMedia { id?: number; formats?: unknown; url?: string; [k: string]: unknown }
     interface RawAuthor { name?: string; title?: string; picture?: RawMedia; [k: string]: unknown }
     interface RawFlatBlogItemSingle {
@@ -339,7 +388,7 @@ export async function searchTrips(params: { destination?: string; from?: string;
 
     // Attempt the primary (richer) query first.
     let res = await fetchApi('/trips', primaryQuery, { suppressErrorLog: true });
-    if (res?.data) return res.data;
+    if (res?.data) return normalizeTrips(res.data);
 
     // Fallback: only filter by title contains to avoid 400s from unknown fields
     // Still enforce date range if available; use title contains for keyword.
@@ -366,7 +415,7 @@ export async function searchTrips(params: { destination?: string; from?: string;
     }
 
     res = await fetchApi('/trips', fallbackQuery);
-    return res?.data || [];
+    return res?.data ? normalizeTrips(res.data) : [];
 }
 
 // --- New: Single types for dynamic site chrome ---

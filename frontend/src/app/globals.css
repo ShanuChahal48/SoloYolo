@@ -322,6 +322,22 @@ body {
   }
 }
 
+/* React-PDF responsive sizing */
+.react-pdf__Document {
+  width: 100%;
+}
+.react-pdf__Page {
+  width: 100% !important;
+  max-width: 100%;
+  overflow: hidden;
+}
+.react-pdf__Page canvas,
+.react-pdf__Page svg {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
 /* DayPicker custom styles to match reference UI */
 .rdp-book {
   --rdp-accent: #2563eb; /* blue-600 */

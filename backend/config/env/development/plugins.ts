@@ -8,7 +8,11 @@ export default ({ env }) => ({
         api_secret: env('CLOUDINARY_SECRET'),
       },
       actionOptions: {
-        upload: {},
+        upload: {
+          resource_type: 'auto',
+          type: 'upload',
+          access_mode: 'public',
+        },
         delete: {},
       },
     },

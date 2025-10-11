@@ -715,6 +715,9 @@ export interface ApiTripTrip extends Struct.CollectionTypeSchema {
     booking_url: Schema.Attribute.String;
     booking_url_verified: Schema.Attribute.Boolean &
       Schema.Attribute.DefaultTo<false>;
+    brochure_pdf: Schema.Attribute.Media<
+      'images' | 'files' | 'videos' | 'audios'
+    >;
     category: Schema.Attribute.Enumeration<['India', 'International']>;
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

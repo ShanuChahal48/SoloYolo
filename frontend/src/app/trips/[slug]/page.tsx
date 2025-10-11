@@ -9,10 +9,11 @@ import Image from 'next/image';
 // Removed unused Link import
 import BookingButton from '@/components/BookingButton';
 import { resolveServerSideBookingLink } from '@/lib/logoutWorld';
-import { getMediaUrl, getMediaAlt, StrapiMedia } from '@/lib/media';
+import { getMediaUrl, getMediaAlt, getStrapiMediaUrl, StrapiMedia } from '@/lib/media';
 import TripGalleryLightboxClient from '@/components/TripGalleryLightboxClient';
 import TripEnquiry from '@/components/TripEnquiry';
 import React from 'react';
+import TripBrochureClient from '@/components/TripBrochureClient';
 
 
 // (Removed unused STRAPI_URL constant)
@@ -36,6 +37,10 @@ interface TripAttributes {
   booking_url?: string | null;
   booking_url_verified?: boolean;
   experience_highlights?: { label: string }[];
+  // Optional brochure PDF from Strapi (support a few likely keys)
+  brochure?: StrapiMedia | null;
+  brochure_pdf?: StrapiMedia | null;
+  pdf?: StrapiMedia | null;
 }
 
 type TripEntity = { id: number; attributes: TripAttributes } | (TripAttributes & { id?: number });
@@ -78,6 +83,53 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     : typeof itinerary === 'string'
     ? [{ type: 'paragraph', children: [{ text: itinerary }] }]
     : [];
+
+  // Try to resolve a brochure PDF URL (support string, direct url object, or full media object)
+  let brochureUrl: string | undefined;
+  const candidate: unknown = (rawAttributes.brochure_pdf ?? rawAttributes.brochure ?? rawAttributes.pdf) as unknown;
+  const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object';
+  const pickUrl = (rec?: Record<string, unknown>): string | undefined => {
+    if (!rec) return undefined;
+    const u = rec.url as unknown;
+    return typeof u === 'string' ? u : undefined;
+  };
+
+  if (typeof candidate === 'string') {
+    brochureUrl = candidate;
+  } else if (isObj(candidate)) {
+    // Shape: { url }
+    brochureUrl = pickUrl(candidate) ? getStrapiMediaUrl(pickUrl(candidate)) : undefined;
+    if (!brochureUrl && isObj((candidate as Record<string, unknown>).data)) {
+      // Shape: { data: { attributes: { url } } } or { data: { url } }
+      const dataObj = (candidate as Record<string, unknown>).data as Record<string, unknown>;
+      brochureUrl = pickUrl(dataObj.attributes as Record<string, unknown>)
+        || pickUrl(dataObj);
+      if (brochureUrl) brochureUrl = getStrapiMediaUrl(brochureUrl);
+    } else if (!brochureUrl && Array.isArray((candidate as Record<string, unknown>).data)) {
+      // Shape: { data: [ { attributes: { url } } | { url } ] }
+      const arr = (candidate as Record<string, unknown>).data as unknown[];
+      if (arr.length > 0 && isObj(arr[0])) {
+        const first = arr[0] as Record<string, unknown>;
+        brochureUrl = pickUrl(first.attributes as Record<string, unknown>) || pickUrl(first);
+        if (brochureUrl) brochureUrl = getStrapiMediaUrl(brochureUrl);
+      }
+    } else if (!brochureUrl) {
+      // Fallback: try StrapiMedia helper
+      brochureUrl = getMediaUrl(candidate as StrapiMedia);
+    }
+  }
+  const effectiveSlug = (internalTripSlug || slug || '').toLowerCase();
+  const titleLower = (title || '').toLowerCase();
+  if (!brochureUrl) {
+    // Example mapping: Spiti → local brochure in public
+    if (effectiveSlug.includes('spiti') || titleLower.includes('spiti')) {
+      brochureUrl = encodeURI('/Winter Spiti.pdf');
+    }
+  }
+
+  // Use the brochure URL as provided. The client PDF viewer will try original first
+  // and only fall back to a /raw/upload variant if needed.
+  const brochureEmbedUrl: string | undefined = brochureUrl;
 
   return (
     <main
@@ -180,6 +232,18 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
                   return null;
                 })}
               </article>
+
+              {!!brochureEmbedUrl && (
+                <div className="mt-8 md:mt-12">
+                  <h3 className="text-3xl font-bold text-slate-100 mb-4">Trip Brochure</h3>
+                  <TripBrochureClient embedUrl={brochureEmbedUrl!} downloadUrl={brochureUrl!} />
+                  <div className="mt-3 text-right">
+                    <a href={brochureUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-medium shadow">
+                      Download PDF
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -288,8 +352,9 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
   );
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const trip = await getTripBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const trip = await getTripBySlug(slug);
   if (!trip) return { title: 'Trip Not Found', description: 'Requested trip does not exist.' };
   let raw: TripAttributes;
   if (hasAttributes(trip as TripEntity)) {
@@ -300,7 +365,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const { name: SITE_NAME } = siteDefaults();
   const title = raw.title ? `${raw.title} | ${SITE_NAME}` : `Trip | ${SITE_NAME}`;
   const desc = excerpt(raw.itinerary && typeof raw.itinerary === 'string' ? raw.itinerary : '', 160) || 'Adventure travel experience.';
-  const canonical = `/trips/${params.slug}`;
+  const canonical = `/trips/${slug}`;
   return {
     title,
     description: desc,

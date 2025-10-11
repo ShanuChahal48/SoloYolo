@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Shared Strapi media helpers
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL || 'http://localhost:1337';
 
@@ -14,10 +15,19 @@ export type StrapiMedia =
 
 export function extractMediaAttributes(media: StrapiMedia | undefined): StrapiImageAttributes | undefined {
   if (!media) return undefined;
-  if ('data' in media && media.data?.attributes) return media.data.attributes;
+  if ('data' in media) {
+    const d: any = (media as any).data;
+    if (d?.attributes) return d.attributes as StrapiImageAttributes;
+    // Fallback: some APIs return url directly under data
+    if (typeof d?.url === 'string') {
+      return { url: d.url, alternativeText: d?.alternativeText } as StrapiImageAttributes;
+    }
+  }
   if ('attributes' in media && media.attributes) return media.attributes;
   return media as StrapiImageAttributes;
 }
+
+// Note: We no longer rewrite Cloudinary PDF URLs; use the URL provided by Strapi as-is.
 
 export function getMediaUrl(media: StrapiMedia | undefined): string {
   const attrs = extractMediaAttributes(media);
