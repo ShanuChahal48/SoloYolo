@@ -151,22 +151,20 @@ export default async function HomePage() {
                 Learn More
               </Link>
             </div>
-            {/* Search is now anchored near the bottom via absolute container below */}
+            {/* Search box directly below the CTAs */}
+            <div className="mt-6 sm:mt-8" data-reveal="fade-up" data-reveal-delay="280">
+              <HeroSearch />
+            </div>
           </div>
         </div>
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 animate-bounce">
+        {/* Scroll Indicator (desktop only) */}
+        <div className="hidden md:block absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30 animate-bounce">
           <div className="w-6 h-10 border-2 border-white/50 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-white/70 rounded-full mt-2 animate-pulse"></div>
           </div>
         </div>
 
-        {/* Anchored search near the bottom of hero */}
-        <div className="absolute left-0 right-0 bottom-20 sm:bottom-24 md:bottom-28 lg:bottom-32 z-30 px-4">
-          <div className="max-w-6xl mx-auto" data-reveal="fade-up" data-reveal-delay="280">
-            <HeroSearch />
-          </div>
-        </div>
+        
           {/* Tree Divider Overlapping Bottom of Hero Image */}
           <div className="absolute left-0 right-0 bottom-0 w-full overflow-visible pointer-events-none" style={{lineHeight: 0}}>
             <Image 

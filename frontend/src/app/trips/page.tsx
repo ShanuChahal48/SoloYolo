@@ -87,15 +87,14 @@ export default async function TripsPage({ searchParams }: { searchParams: Promis
                 Curated • Immersive • Unforgettable
               </span>
             </div>
+            {/* Search box directly below the hero copy */}
+            <div className="mt-6 sm:mt-8">
+              <HeroSearch />
+            </div>
           </div>
         </div>
 
-        {/* Anchored search near the bottom of the trips hero */}
-        <div className="absolute left-0 right-0 bottom-20 sm:bottom-24 md:bottom-28 lg:bottom-32 z-30 px-4">
-          <div className="max-w-6xl mx-auto">
-            <HeroSearch />
-          </div>
-        </div>
+        
 
         {/* Mountain divider like homepage */}
         <div className="absolute left-0 right-0 bottom-0 w-full overflow-visible pointer-events-none" style={{lineHeight:0}}>
