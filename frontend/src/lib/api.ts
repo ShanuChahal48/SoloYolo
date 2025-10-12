@@ -109,8 +109,8 @@ export async function getTripBySlug(slug: string) {
     // Try multiple populate strategies to avoid 400s from unknown fields
     const populates: Array<Record<string, unknown> | string[] | string> = [
         // Use only known fields to avoid 400s from unknown keys
-        { featured_image: true, gallery: true, brochure_pdf: true },
-        ['featured_image', 'gallery', 'brochure_pdf'],
+        { featured_image: true, gallery: true, brochure_pdf: true, days: { populate: '*' } },
+        ['featured_image', 'gallery', 'brochure_pdf', 'days'],
         '*',
     ];
 

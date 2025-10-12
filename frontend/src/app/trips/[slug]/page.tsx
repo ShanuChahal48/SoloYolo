@@ -13,7 +13,7 @@ import { getMediaUrl, getMediaAlt, getStrapiMediaUrl, StrapiMedia } from '@/lib/
 import TripGalleryLightboxClient from '@/components/TripGalleryLightboxClient';
 import TripEnquiry from '@/components/TripEnquiry';
 import React from 'react';
-import TripBrochureClient from '@/components/TripBrochureClient';
+import TripDetailsSectionsStacked from '@/components/TripDetailsSectionsStacked';
 
 
 // (Removed unused STRAPI_URL constant)
@@ -24,6 +24,9 @@ import TripBrochureClient from '@/components/TripBrochureClient';
 type ItineraryBlock = { type: string; children?: { text: string }[] };
 type ItineraryValue = string | ItineraryBlock[] | null | undefined;
 
+type RteTextChild = { text?: string } | string;
+type RteBlock = { type?: string; level?: number; children?: RteTextChild[] };
+
 interface TripAttributes {
   title: string;
   price: number;
@@ -31,6 +34,21 @@ interface TripAttributes {
   start_date?: string;
   category?: string;
   itinerary?: ItineraryValue;
+  // Optional section fields – different Strapi envs may use different names
+  overview?: unknown; // can be string or blocks
+  excerpt?: string | null;
+  inclusions?: string | string[] | null;
+  inclusion?: string | string[] | null;
+  included?: string | string[] | null;
+  exclusions?: string | string[] | null;
+  exclusion?: string | string[] | null;
+  not_included?: string | string[] | null;
+  other_info?: string | string[] | null;
+  otherInfo?: string | string[] | null;
+  must_carry?: string | string[] | null;
+  travel_essentials?: string | string[] | null;
+  gears?: string | string[] | null;
+  clothes?: string | string[] | null;
   featured_image?: StrapiMedia;
   gallery?: StrapiMedia[];
   slug?: string;
@@ -41,6 +59,10 @@ interface TripAttributes {
   brochure?: StrapiMedia | null;
   brochure_pdf?: StrapiMedia | null;
   pdf?: StrapiMedia | null;
+  // Day-based itinerary can vary
+  days?: unknown;
+  itinerary_days?: unknown;
+  itineraryDays?: unknown;
 }
 
 type TripEntity = { id: number; attributes: TripAttributes } | (TripAttributes & { id?: number });
@@ -77,12 +99,122 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
     : await resolveServerSideBookingLink({ title, internalSlug: internalTripSlug });
 
   // Render itinerary blocks as paragraphs
-  type RichTextBlock = { type: 'paragraph'; children?: { text: string }[] };
+  type RichTextBlock = { type: 'paragraph'; children?: { text?: string }[] };
   const itineraryBlocks: RichTextBlock[] = Array.isArray(itinerary)
-    ? itinerary as RichTextBlock[]
+    ? (itinerary as unknown as RichTextBlock[])
     : typeof itinerary === 'string'
     ? [{ type: 'paragraph', children: [{ text: itinerary }] }]
     : [];
+
+  // Helpers to extract plain text from rich text blocks and pick first available field
+  const blocksToText = (blocks: ReadonlyArray<RichTextBlock>) =>
+    (blocks || [])
+      .map(b => (b?.children || []).map(c => c?.text || '').join(' ').trim())
+      .filter(Boolean)
+      .join('\n');
+
+  const pickString = (...vals: Array<unknown>) => {
+    for (const v of vals) {
+      if (typeof v === 'string' && v.trim()) return v.trim();
+    }
+    return undefined;
+  };
+
+  const pickStringOrLines = (...vals: Array<unknown>): string | string[] | undefined => {
+    for (const v of vals) {
+      if (!v) continue;
+      if (typeof v === 'string' && v.trim()) return v.trim();
+      if (Array.isArray(v)) return v as string[];
+    }
+    return undefined;
+  };
+
+  // Overview: support blocks or string. Prefer 'overview' field, then 'excerpt', then first itinerary paragraph.
+  const isBlock = (node: unknown): node is RteBlock => !!node && typeof node === 'object';
+  const childText = (c: RteTextChild): string => (typeof c === 'string' ? c : (typeof c?.text === 'string' ? c.text : ''));
+  const blockToLine = (b: RteBlock): string => Array.isArray(b.children) ? b.children.map(childText).join(' ') : '';
+  const coerceBlocksText = (v: unknown): string | undefined => {
+    if (!Array.isArray(v)) return undefined;
+    const lines = (v as unknown[])
+      .map((b) => (isBlock(b) ? blockToLine(b) : ''))
+      .map((s) => s.trim())
+      .filter(Boolean);
+    return lines.length ? lines.join('\n') : undefined;
+  };
+  const overviewRaw = ((rawAttributes as unknown) as Record<string, unknown>).overview;
+  const overviewFromBlocks = coerceBlocksText(overviewRaw);
+  const overviewText: string | undefined =
+    (typeof rawAttributes.overview === 'string' ? rawAttributes.overview : undefined) ||
+    overviewFromBlocks ||
+    (typeof rawAttributes.excerpt === 'string' ? rawAttributes.excerpt : undefined) ||
+    (itineraryBlocks.length ? (itineraryBlocks[0]?.children || []).map(c => c.text).join(' ').trim() : undefined);
+
+  // Itinerary string: join rich blocks if present
+  const itineraryText: string | undefined =
+    typeof itinerary === 'string' ? itinerary : (itineraryBlocks.length ? blocksToText(itineraryBlocks) : undefined);
+
+  // Inclusions / Exclusions: support blocks, strings or arrays. Pass raw so client can flatten rich text.
+  const inclusionsVal: unknown = (rawAttributes.inclusions ?? rawAttributes.inclusion ?? rawAttributes.included) as unknown;
+  const exclusionsVal: unknown = (rawAttributes.exclusions ?? rawAttributes.exclusion ?? rawAttributes.not_included) as unknown;
+
+  // Day-based itinerary support: try common shapes
+  type DayInput =
+    | { title?: string; label?: string; heading?: string; summary?: string; description?: string; content?: string; points?: unknown }
+    | { [k: string]: unknown };
+  const anyAttrs = (rawAttributes as unknown) as Record<string, unknown>;
+  const rawDays: unknown = anyAttrs.days || anyAttrs.itinerary_days || anyAttrs.itineraryDays;
+  const normalizeDay = (d: DayInput) => {
+    const label = pickString(d.label, d.title, d.heading) || 'Day';
+    const summary = pickString(d.summary, d.description, d.content);
+    const points = asLinesCompat(d.points);
+    // Also try to extract lines from a long summary string
+    const linesFromSummary = summary ? summary.split(/\r?\n|•|\u2022|\t|\*/g).map(s=>s.trim()).filter(Boolean) : [];
+    const lines = points.length ? points : linesFromSummary;
+    return { label, summary: lines === linesFromSummary ? undefined : summary, lines };
+  };
+  // helper compatible with client asLines
+  const asLinesCompat = (v: unknown): string[] => {
+    if (!v) return [];
+    if (typeof v === 'string') return v.split(/\r?\n|•|\u2022|\t|\*/g).map(s=>s.trim()).filter(Boolean);
+    if (Array.isArray(v)) return (v as unknown[]).map(x => (typeof x === 'string' ? x.trim() : (typeof (x as { text?: string })?.text === 'string' ? ((x as { text?: string }).text as string).trim() : ''))).filter(Boolean);
+    if (typeof v === 'object' && v !== null && Array.isArray((v as { children?: unknown[] }).children)) {
+      const children = ((v as { children?: unknown[] }).children || []) as RteTextChild[];
+      return children.map(childText).map((s)=>s.trim()).filter(Boolean);
+    }
+    return [];
+  };
+  const itineraryDays = Array.isArray(rawDays) ? (rawDays as DayInput[]).map(normalizeDay) : undefined;
+
+  // Other Info: combine various buckets if available
+  const otherBuckets: Array<{title: string; value?: string | string[]}> = [
+    { title: 'Must Carry', value: pickStringOrLines(rawAttributes.must_carry) },
+    { title: 'Travel Essentials', value: pickStringOrLines(rawAttributes.travel_essentials) },
+    { title: 'Gears', value: pickStringOrLines(rawAttributes.gears) },
+    { title: 'Clothes', value: pickStringOrLines(rawAttributes.clothes) },
+  ];
+  const genericOtherRaw: unknown = (rawAttributes.otherInfo ?? rawAttributes.other_info) as unknown;
+  const otherInfoLines: string[] = [];
+  for (const b of otherBuckets) {
+    const v = b.value;
+    if (!v) continue;
+    otherInfoLines.push(b.title + ':');
+    if (Array.isArray(v)) {
+      otherInfoLines.push(...(v.filter(Boolean) as string[]));
+    } else {
+      otherInfoLines.push(...v.split(/\r?\n|•|\u2022|\t|\*/g).map(s => s.trim()).filter(Boolean));
+    }
+  }
+  if (genericOtherRaw) {
+    if (typeof genericOtherRaw === 'string') {
+      otherInfoLines.push(...genericOtherRaw.split(/\r?\n|•|\u2022|\t|\*/g).map(s => s.trim()).filter(Boolean));
+    } else if (Array.isArray(genericOtherRaw)) {
+      otherInfoLines.push(...(genericOtherRaw as string[]).filter(Boolean));
+    } else if (typeof genericOtherRaw === 'object' && genericOtherRaw !== null && Array.isArray((genericOtherRaw as { children?: unknown[] }).children)) {
+      // if it's blocks, coerce to lines
+      const text = coerceBlocksText(genericOtherRaw);
+      if (text) otherInfoLines.push(...text.split(/\r?\n/).map(s=>s.trim()).filter(Boolean));
+    }
+  }
 
   // Try to resolve a brochure PDF URL (support string, direct url object, or full media object)
   let brochureUrl: string | undefined;
@@ -133,7 +265,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
 
   return (
     <main
-      className="overflow-hidden relative min-h-screen"
+      className="relative min-h-screen overflow-visible"
       style={{
         backgroundColor: '#0f172a',
         backgroundImage: `url('/galaxy.svg'), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
@@ -164,6 +296,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
         
         {/* Floating Title */}
         <div className="absolute inset-0 flex items-end justify-center pb-16">
@@ -178,7 +311,7 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
                 ))}
               </div>
             )}
-            <div className="flex items-center justify-center space-x-6 text-teal-200">
+            <div className="flex items-center justify-center gap-4 flex-wrap text-teal-200">
               <div className="flex items-center space-x-2">
                 <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
@@ -191,60 +324,48 @@ export default async function TripDetailPage({ params }: { params: Promise<{ slu
                 </svg>
                 <span className="text-lg font-medium">{category}</span>
               </div>
+              {!!brochureEmbedUrl && (
+                <a
+                  href={brochureUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-semibold px-3 py-1.5 md:px-4 md:py-2 shadow-md ring-1 ring-cyan-300/60 backdrop-blur-sm"
+                >
+                  <svg className="w-4 h-4 md:w-5 md:h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zM12 2l-5 5h3v6h4V7h3l-5-5z"/></svg>
+                  <span className="text-sm md:text-base">Download Itinerary</span>
+                </a>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-6 py-20 -mt-16 relative z-10">
+  <div className="container mx-auto px-6 py-20 -mt-16 relative z-10 overflow-visible">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
-          {/* Main Content: Itinerary */}
+          {/* Main Content: Stacked sections (reference.mov style) */}
           <div className="lg:col-span-2">
-            <div
-              className="rounded-2xl shadow-xl p-8 md:p-12 animate-fade-in-up"
-              style={{
-                background: 'linear-gradient(180deg, rgba(30,64,175,0.18) 0%, rgba(15,23,42,0.85) 100%)',
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3C!-- Stars (White/Slate-100 with varying opacity) --%3E%3Ccircle cx='10' cy='10' r='1' fill='%23f1f5f9' opacity='0.2'/%3E%3Ccircle cx='50' cy='50' r='0.5' fill='%23f1f5f9' opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='1.5' fill='%23f1f5f9' opacity='0.15'/%3E%3Ccircle cx='30' cy='75' r='0.8' fill='%23f1f5f9' opacity='0.3'/%3E%3Ccircle cx='95' cy='90' r='0.6' fill='%23f1f5f9' opacity='0.5'/%3E%3Ccircle cx='5' cy='55' r='1.2' fill='%23f1f5f9' opacity='0.1'/%3E%3C!-- Subtle Nebula/Swirl (Cyan with very low opacity) --%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.5' opacity='0.08' d='M0 50 C25 25, 75 75, 100 50'/%3E%3Cpath fill='none' stroke='%2338bdf8' stroke-width='0.3' opacity='0.05' d='M50 0 C75 25, 25 75, 50 100'/%3E%3C/svg%3E")`,
-                backgroundRepeat: 'repeat',
-                backgroundSize: '100px 100px',
-                backgroundAttachment: 'fixed',
-                backgroundPosition: 'center',
-                color: '#f1f5f9',
-              }}
-            >
-              <h2 className="text-4xl font-bold text-slate-100 mb-8">Trip Itinerary</h2>
-              {/* Render the HTML from markdown */}
-              <article className="prose lg:prose-xl max-w-none prose-headings:text-slate-100 prose-p:text-slate-200 prose-a:text-cyan-400 prose-strong:text-white prose-blockquote:text-slate-300 prose-code:text-cyan-300 prose-pre:bg-slate-900">
-                {itineraryBlocks.map((block, idx) => {
-                  if (block.type === 'paragraph' && block.children) {
-                    const text = block.children.map((child) => child.text).join(' ');
-                    if (text.trim()) {
-                      return (
-                        <div key={idx} className="mb-6 p-6 bg-gradient-to-r from-teal-50 to-amber-50 rounded-xl border-l-4 border-teal-500 shadow-sm hover:shadow-md transition-shadow duration-300">
-                          <p className="text-lg text-gray-700 leading-relaxed m-0">
-                            {text}
-                          </p>
-                        </div>
-                      );
-                    }
-                  }
-                  return null;
-                })}
-              </article>
-
-              {!!brochureEmbedUrl && (
-                <div className="mt-8 md:mt-12">
-                  <h3 className="text-3xl font-bold text-slate-100 mb-4">Trip Brochure</h3>
-                  <TripBrochureClient embedUrl={brochureEmbedUrl!} downloadUrl={brochureUrl!} />
-                  <div className="mt-3 text-right">
-                    <a href={brochureUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 text-white font-medium shadow">
-                      Download PDF
-                    </a>
-                  </div>
-                </div>
-              )}
-            </div>
+            <TripDetailsSectionsStacked
+              overview={Array.isArray(overviewRaw) ? (overviewRaw as unknown as RteBlock[]) : overviewText}
+              highlights={experience_highlights}
+              itinerary={itineraryText}
+              itineraryDays={itineraryDays}
+              inclusions={inclusionsVal as unknown as (string | string[] | RteBlock[] | null | undefined)}
+              exclusions={exclusionsVal as unknown as (string | string[] | RteBlock[] | null | undefined)}
+              otherInfo={(otherInfoLines.length ? otherInfoLines : (genericOtherRaw as (string | string[] | RteBlock[] | null | undefined)))}
+            />
+            {!!brochureEmbedUrl && (
+              <div className="mt-8 flex justify-center">
+                <a
+                  href={brochureUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-semibold shadow"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 20h14v-2H5v2zM12 2l-5 5h3v6h4V7h3l-5-5z"/></svg>
+                  Download Itinerary
+                </a>
+              </div>
+            )}
           </div>
 
           {/* Sidebar: Booking & Details */}

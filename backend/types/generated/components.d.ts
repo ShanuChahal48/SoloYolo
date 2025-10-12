@@ -47,6 +47,19 @@ export interface SharedTeamMember extends Struct.ComponentSchema {
   };
 }
 
+export interface TripDay extends Struct.ComponentSchema {
+  collectionName: 'components_trip_day';
+  info: {
+    description: 'A single day within an itinerary';
+    displayName: 'day';
+  };
+  attributes: {
+    label: Schema.Attribute.String;
+    points: Schema.Attribute.Text;
+    summary: Schema.Attribute.Text;
+  };
+}
+
 declare module '@strapi/strapi' {
   export module Public {
     export interface ComponentSchemas {
@@ -54,6 +67,7 @@ declare module '@strapi/strapi' {
       'shared.experience-highlight': SharedExperienceHighlight;
       'shared.nav-link': SharedNavLink;
       'shared.team-member': SharedTeamMember;
+      'trip.day': TripDay;
     }
   }
 }

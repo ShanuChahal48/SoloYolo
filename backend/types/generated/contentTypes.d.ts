@@ -722,8 +722,10 @@ export interface ApiTripTrip extends Struct.CollectionTypeSchema {
     createdAt: Schema.Attribute.DateTime;
     createdBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &
       Schema.Attribute.Private;
+    days: Schema.Attribute.Component<'trip.day', true>;
     duration: Schema.Attribute.String;
     excerpt: Schema.Attribute.Text;
+    exclusions: Schema.Attribute.Blocks;
     experience_highlights: Schema.Attribute.Component<
       'shared.experience-highlight',
       true
@@ -736,11 +738,13 @@ export interface ApiTripTrip extends Struct.CollectionTypeSchema {
       'images' | 'files' | 'videos' | 'audios',
       true
     >;
+    inclusions: Schema.Attribute.Blocks;
     is_featured: Schema.Attribute.Boolean & Schema.Attribute.DefaultTo<false>;
-    itinerary: Schema.Attribute.Blocks;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::trip.trip'> &
       Schema.Attribute.Private;
+    other_info: Schema.Attribute.Blocks;
+    overview: Schema.Attribute.Blocks;
     price: Schema.Attribute.Decimal & Schema.Attribute.Required;
     publishedAt: Schema.Attribute.DateTime;
     slug: Schema.Attribute.UID<'title'> & Schema.Attribute.Required;

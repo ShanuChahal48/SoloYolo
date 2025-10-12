@@ -51,9 +51,6 @@
         "audios"
       ]
     },
-    "itinerary": {
-      "type": "blocks"
-    },
     "category": {
       "type": "enumeration",
       "enum": [
@@ -91,6 +88,23 @@
         "videos",
         "audios"
       ]
+    },
+    "overview": {
+      "type": "blocks"
+    },
+    "inclusions": {
+      "type": "blocks"
+    },
+    "exclusions": {
+      "type": "blocks"
+    },
+    "other_info": {
+      "type": "blocks"
+    },
+    "days": {
+      "type": "component",
+      "component": "trip.day",
+      "repeatable": true
     }
   }
 }

@@ -1,6 +1,42 @@
 @import "tailwindcss";
 /* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap'); */
 
+/*
+  Quick theme controls:
+  - Override Tailwind v4 color CSS variables here (no @theme block), so utilities like bg-cyan-100 pick these values.
+  - Adjust radii to slightly rounder defaults.
+*/
+:root {
+  /* Brand-leaning Cyan (teal-ish) */
+  --color-cyan-50:  #effef8;
+  --color-cyan-100: #d9fbf0;
+  --color-cyan-200: #b6f5e1;
+  --color-cyan-300: #8eeed1;
+  --color-cyan-500: #10b981; /* matches --primary-ish */
+  --color-cyan-700: #0f766e;
+
+  /* Emerald tweaks to align with brand primary */
+  --color-emerald-50:  #ecfdf5;
+  --color-emerald-100: #d1fae5;
+  --color-emerald-200: #a7f3d0;
+  --color-emerald-300: #6ee7b7;
+  --color-emerald-500: #10b981;
+  --color-emerald-700: #047857;
+
+  /* Subtle rose for exclusions */
+  --color-rose-100: #ffe4e6;
+  --color-rose-700: #be123c;
+
+  /* Slate text tones */
+  --color-slate-700: #334155;
+  --color-slate-800: #1f2937;
+  --color-slate-900: #0f172a;
+
+  /* Rounded tokens used by rounded-xl/2xl utilities */
+  --radius-xl: 1.1rem;
+  --radius-2xl: 1.25rem;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #1a1a1a;
